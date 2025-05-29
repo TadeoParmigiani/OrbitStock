@@ -1,0 +1,228 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Encabezado de contenido -->
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Gestión de Usuarios</h1>
+    </div>
+</div>
+
+<!-- Contenido principal -->
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Listado de Usuarios -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Usuarios</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addUserModal">
+                                <i class="fas fa-plus"></i> Nuevo Usuario
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre de Usuario</th>
+                                    <th>Email</th>
+                                    <th>Rol</th> <!-- Columna de rol -->
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.get_role_display }}</td> <!-- Mostrar rol -->
+                                    <td>
+                                       <!-- Botón editar -->
+                                        <button class="btn btn-warning btn-sm edit-user-btn" 
+                                        data-id="{{ user.id }}" 
+                                        data-username="{{ user.username }}" 
+                                        data-email="{{ user.email }}" 
+                                        data-role="{{ user.role }}" 
+                                        data-toggle="modal" 
+                                        data-target="#editUserModal">
+                                        <i class="fas fa-edit"></i> Editar
+                                        </button>
+
+                                        <!-- Botón eliminar -->
+                                        <form method="POST" action="{% url 'userDelete' %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ user.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" 
+                                                    {% if users|length == 1 %}disabled{% endif %}>
+                                                <i class="fas fa-trash-alt"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Agregar Usuario -->
+<div class="modal fade" id="addUserModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" action="{% url 'userCreate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Usuario</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" name="username" class="form-control" required minlength="3">
+                        <div class="invalid-feedback">Ingrese un nombre de usuario (mínimo 3 caracteres).</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                        <div class="invalid-feedback">Ingrese un email válido.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" name="password" class="form-control" required minlength="6">
+                        <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Rol</label>
+                        <select name="role" class="form-control" required>
+                            <option value="">Seleccione un rol</option>
+                            <option value="admin">Admin</option>
+                            <option value="employee">Empleado</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione un rol.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Usuario -->
+<div class="modal fade" id="editUserModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" action="{% url 'userUpdate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Usuario</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-user-id" name="id">
+                    <div class="form-group">
+                        <label>Usuario</label>
+                        <input type="text" id="edit-username" name="username" class="form-control" required minlength="3">
+                        <div class="invalid-feedback">Ingrese un nombre de usuario (mínimo 3 caracteres).</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit-email" name="email" class="form-control" required>
+                        <div class="invalid-feedback">Ingrese un email válido.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Contraseña (opcional)</label>
+                        <input type="password" id="edit-password" name="password" class="form-control" minlength="6">
+                        <div class="invalid-feedback">Si ingresa una contraseña, debe tener al menos 6 caracteres.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Rol</label>
+                        <select name="role" id="edit-role" class="form-control" required>
+                            <option value="">Seleccione un rol</option>
+                            <option value="admin">Admin</option>
+                            <option value="employee">Empleado</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione un rol.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            const forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.forEach.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    const password = form.querySelector('[name="password"]');
+                    if (password && password.value.length > 0 && password.value.length < 6) {
+                        password.setCustomValidity("La contraseña debe tener al menos 6 caracteres.");
+                    } else {
+                        password.setCustomValidity("");
+                    }
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+
+
+<script>
+   
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.edit-user-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var userId = this.getAttribute('data-id');
+                var username = this.getAttribute('data-username');
+                var email = this.getAttribute('data-email');
+                var role = this.getAttribute('data-role');
+
+                document.getElementById('edit-user-id').value = userId;
+                document.getElementById('edit-username').value = username;
+                document.getElementById('edit-email').value = email;
+                document.getElementById('edit-role').value = role;
+            });
+        });
+    });
+</script>
+
+{% endblock %}

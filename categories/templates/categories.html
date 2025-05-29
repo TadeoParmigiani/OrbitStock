@@ -1,0 +1,83 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Encabezado de contenido (puedes adaptarlo a tu diseño) -->
+<div class="content-header">
+  <div class="container-fluid">
+    <h1 class="m-0 text-dark">Listado de Categorías</h1>
+  </div>
+</div>
+
+<!-- Contenido principal -->
+<section class="content">
+  <div class="container-fluid">
+    {% if messages %}
+      <div class="row">
+        <div class="col-12">
+          {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Card de AdminLTE -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Categorías</h3>
+            <div class="card-tools">
+              <!-- Botón para crear nueva categoría -->
+              <a href="" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Nueva Categoría
+              </a>
+            </div>
+          </div>
+          <!-- /.card-header -->
+
+          <div class="card-body">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for category in categories %}
+                  <tr>
+                    <td>{{ category.id }}</td>
+                    <td>{{ category.name }}</td>
+                    <td>
+                      <!-- Botón editar -->
+                      <a href="" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Editar
+                      </a>
+                      <!-- Botón eliminar -->
+                      <a href="" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <!-- /.card-body -->
+
+          <div class="card-footer">
+            <!-- Si usas paginación o algún pie de tabla, va aquí -->
+          </div>
+          <!-- /.card-footer -->
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{% endblock %}

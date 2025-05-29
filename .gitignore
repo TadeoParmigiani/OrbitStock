@@ -1,0 +1,29 @@
+# Entorno virtual
+venv/
+ENV/
+env/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Archivos temporales del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos y configuraciones de PyCharm/VSCode
+.idea/
+.vscode/
+
+# Archivos de migración (opcional ignorarlos si no compartís el control de versiones)
+# */migrations/
+
+# Archivos estáticos recolectados
+staticfiles/
+
+# Archivos de log
+*.log
+
+# Archivos de configuración sensibles
+.env
