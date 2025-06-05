@@ -91,7 +91,7 @@
         <div class="info">
           <a href="#" class="d-block" id="username-link">
             {% if request.session.username %} 
-              {{ request.session.username }} - {{ request.user.role }} 
+              {{ request.session.username }} - {{ request.user.get_role_display }} 
             {% else %}
               Invitado
             {% endif %}
@@ -115,7 +115,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="/categories" class="nav-link">
+            <a href="/categories/list" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               <p>Categorías</p>
             </a>
@@ -139,7 +139,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/calendar/list" class="nav-link">
               <i class="nav-icon far fa-calendar-alt"></i>
               <p>Calendario</p>
             </a>
@@ -174,7 +174,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="/categories" class="nav-link">
+            <a href="/categories/list" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               <p>Categorías</p>
             </a>
@@ -254,7 +254,7 @@
 <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
 <!-- fullCalendar 2.2.5 -->
 <script src="{% static 'plugins/fullcalendar/main.js' %}"></script>
-
+<script src="../plugins/moment/moment.min.js"></script>
 <script>
   $(function () {
 

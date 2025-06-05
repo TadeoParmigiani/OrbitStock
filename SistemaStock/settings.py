@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'customers',
     'users',
     'index',
+    'event_calendar',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +63,9 @@ ROOT_URLCONF = 'SistemaStock.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates',
+                    ],
+        
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
