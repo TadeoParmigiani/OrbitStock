@@ -1,83 +1,198 @@
 {% extends 'index.html' %}
 {% load static %}
-
 {% block content %}
-<!-- Encabezado de contenido (puedes adaptarlo a tu diseño) -->
+<!-- Encabezado de contenido -->
 <div class="content-header">
-  <div class="container-fluid">
-    <h1 class="m-0 text-dark">Listado de Categorías</h1>
-  </div>
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Gestión de Categorías</h1>
+    </div>
 </div>
 
 <!-- Contenido principal -->
 <section class="content">
-  <div class="container-fluid">
-    {% if messages %}
-      <div class="row">
-        <div class="col-12">
-          {% for message in messages %}
-            <div class="alert alert-info">{{ message }}</div>
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %}
-
-    <div class="row">
-      <div class="col-md-12">
-        <!-- Card de AdminLTE -->
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Categorías</h3>
-            <div class="card-tools">
-              <!-- Botón para crear nueva categoría -->
-              <a href="" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Nueva Categoría
-              </a>
-            </div>
-          </div>
-          <!-- /.card-header -->
-
-          <div class="card-body">
-            <table class="table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for category in categories %}
-                  <tr>
-                    <td>{{ category.id }}</td>
-                    <td>{{ category.name }}</td>
-                    <td>
-                      <!-- Botón editar -->
-                      <a href="" class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit"></i> Editar
-                      </a>
-                      <!-- Botón eliminar -->
-                      <a href="" class="btn btn-danger btn-sm">
-                        <i class="fas fa-trash-alt"></i> Eliminar
-                      </a>
-                    </td>
-                  </tr>
+    <div class="container-fluid">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          <!-- /.card-body -->
-
-          <div class="card-footer">
-            <!-- Si usas paginación o algún pie de tabla, va aquí -->
-          </div>
-          <!-- /.card-footer -->
+            </div>
         </div>
-        <!-- /.card -->
-      </div>
+        {% endif %}
+
+        <!-- Listado de Categorías -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Categorías</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addCategoriaModal">
+                              <i class="fas fa-plus"></i> Nueva Categoría
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                          <tbody>
+                              {% for categoria in categorias %}
+                              <tr>
+                                  <td>{{ categoria.id }}</td>
+                                  <td>{{ categoria.nombre }}</td>
+                                  <td>
+                                      <!-- Botón editar -->
+                                      <button class="btn btn-warning btn-sm edit-categoria-btn"
+                                          data-id="{{ categoria.id }}"
+                                          data-nombre="{{ categoria.nombre }}"
+                                          data-toggle="modal"
+                                          data-target="#editCategoriaModal">
+                                          <i class="fas fa-edit"></i> Editar
+                                      </button>
+
+                                      <!-- Botón eliminar -->
+                                      <form method="POST" action="{% url 'categoryDelete' %}" class="d-inline">
+                                          {% csrf_token %}
+                                          <input type="hidden" name="id" value="{{ categoria.id }}">
+                                          <button type="submit" class="btn btn-danger btn-sm"
+                                              {% if categorias|length == 1 %}disabled{% endif %}>
+                                              <i class="fas fa-trash-alt"></i> Eliminar
+                                          </button>
+                                      </form>
+                                  </td>
+                              </tr>
+                              {% endfor %}
+                          </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
+<!-- Modal Agregar Categoría -->
+<div class="modal fade" id="addCategoriaModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" action="{% url 'categoryCreate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Categoría</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre de la Categoría</label>
+                        <input type="text" name="nombre" class="form-control" required minlength="2">
+                        <div class="invalid-feedback">Ingrese un nombre válido (mínimo 2 caracteres).</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
+
+<!-- Modal Editar Categoría -->
+<div class="modal fade" id="editCategoriaModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+              <form class="needs-validation" novalidate method="POST" action="{% url 'categoryUpdate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Categoría</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-categoria-id" name="id">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="edit-categoria-nombre" name="nombre" class="form-control" required minlength="2">
+                        <div class="invalid-feedback">Ingrese un nombre válido (mínimo 2 caracteres).</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Validación frontend con Bootstrap
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            const forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.forEach.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+
+<script>
+    // Completa el modal de edición con los datos de la categoría
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.edit-categoria-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var categoriaId = this.getAttribute('data-id');
+                var nombre = this.getAttribute('data-nombre');
+
+                document.getElementById('edit-categoria-id').value = categoriaId;
+                document.getElementById('edit-categoria-nombre').value = nombre;
+            });
+        });
+    });
+</script>
+<script>
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            const forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.forEach.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    const nombreInput = form.querySelector('[name="nombre"]');
+                    
+                    // Validación personalizada del nombre (mínimo 2 caracteres)
+                    if (nombreInput && nombreInput.value.trim().length < 2) {
+                        nombreInput.setCustomValidity("El nombre debe tener al menos 2 caracteres.");
+                    } else {
+                        nombreInput.setCustomValidity("");
+                    }
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
 {% endblock %}

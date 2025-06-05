@@ -30,4 +30,5 @@ urlpatterns = [
      path('users/', include('users.urls')),
      path('', users_views.login, name='login'),
      path('index', index_views.index, name='index'),
+     path('calendar/', include('event_calendar.urls')),
 ]
