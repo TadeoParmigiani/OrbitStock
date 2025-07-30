@@ -1,0 +1,255 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Gestión de Productos</h1>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Productos</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addProductoModal">
+                                <i class="fas fa-plus"></i> Nuevo Producto
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="mi-tabla" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Código</th>
+                                    <th>Categoría</th>
+                                    <th>Precio Compra</th>
+                                    <th>Precio Venta</th>
+                                    <th>Stock</th>
+                                    <th>Estado</th>
+                                    <th>Imagen</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for producto in productos %}
+                                <tr>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>{{ producto.codigo }}</td>
+                                    <td>{{ producto.categoria.nombre }}</td>
+                                    <td>${{ producto.precio_compra }}</td>
+                                    <td>${{ producto.precio_venta }}</td>
+                                    <td>{{ producto.stock_inicial }}</td>
+                                    <td>{{ producto.estado|yesno:"Activo,Inactivo" }}</td>
+                                    <td>
+                                        {% if producto.imagen %}
+                                            <img src="{{ producto.imagen.url }}" alt="Imagen" class="img-thumbnail" style="max-height: 60px;">
+                                        {% else %}
+                                            <span class="text-muted">Sin imagen</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button 
+                                            class="btn btn-warning btn-sm editar-producto-btn"
+                                            data-id="{{ producto.id }}"
+                                            data-nombre="{{ producto.nombre }}"
+                                            data-codigo="{{ producto.codigo }}"
+                                            data-descripcion="{{ producto.descripcion }}"
+                                            data-categoria="{{ producto.categoria.id }}"
+                                            data-precio_compra="{{ producto.precio_compra }}"
+                                            data-precio_venta="{{ producto.precio_venta }}"
+                                            data-stock="{{ producto.stock_inicial }}"
+                                            data-estado="{{ producto.estado }}"
+                                            data-imagen-url="{% if producto.imagen %}{{ producto.imagen.url }}{% endif %}"
+                                        >
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form method="POST" action="{% url 'productDelete' producto.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Agregar/Editar Producto -->
+<div class="modal fade" id="addProductoModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="formAgregarProducto" method="POST" enctype="multipart/form-data" action="{% url 'productCreate' %}" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Producto</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="producto_id" id="productoId">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Nombre</label>
+                            <input type="text" name="nombre" id="nombreInput" class="form-control" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Código</label>
+                            <input type="text" name="codigo" id="codigoInput" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea name="descripcion" id="descripcionInput" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Categoría</label>
+                            <select name="categoria" id="categoriaSelect" class="form-control" required>
+                                <option value="" disabled selected>Seleccione una categoría</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Precio Compra</label>
+                            <input type="number" name="precio_compra" id="precioCompraInput" class="form-control" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Precio Venta</label>
+                            <input type="number" name="precio_venta" id="precioVentaInput" class="form-control" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>Stock Inicial</label>
+                            <input type="number" name="stock_inicial" id="stockInput" class="form-control" required min="0">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Estado</label><br>
+                            <input type="checkbox" name="estado" id="estadoCheckbox" checked> Activo
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Imagen</label>
+                            <input type="file" name="imagen" class="form-control-file" id="imagenInput" accept="image/*">
+                            <img id="previewImagen" src="#" alt="Previsualización" class="img-thumbnail mt-2 d-none" style="max-height: 100px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("formAgregarProducto");
+    const imagenInput = document.getElementById("imagenInput");
+    const preview = document.getElementById("previewImagen");
+
+    // Previsualización de imagen
+    imagenInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove("d-none");
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "#";
+            preview.classList.add("d-none");
+        }
+    });
+
+    // Rellenar formulario al hacer clic en editar
+    document.querySelectorAll(".editar-producto-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const modal = $('#addProductoModal');
+            form.setAttribute("action", `/products/update/${this.dataset.id}/`);
+
+            document.getElementById("productoId").value = this.dataset.id;
+            document.getElementById("nombreInput").value = this.dataset.nombre;
+            document.getElementById("codigoInput").value = this.dataset.codigo;
+            document.getElementById("descripcionInput").value = this.dataset.descripcion;
+            document.getElementById("categoriaSelect").value = this.dataset.categoria;
+            document.getElementById("precioCompraInput").value = this.dataset.precio_compra;
+            document.getElementById("precioVentaInput").value = this.dataset.precio_venta;
+            document.getElementById("stockInput").value = this.dataset.stock;
+            document.getElementById("estadoCheckbox").checked = this.dataset.estado === "True";
+
+            if (this.dataset.imagenUrl) {
+                preview.src = this.dataset.imagenUrl;
+                preview.classList.remove("d-none");
+            } else {
+                preview.src = "#";
+                preview.classList.add("d-none");
+            }
+
+            modal.modal('show');
+        });
+    });
+
+    // Envío del formulario por fetch
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        form.classList.add("was-validated");
+        if (!form.checkValidity()) {
+            return;
+        }
+
+        const url = form.getAttribute("action");
+        const formData = new FormData(form);
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Error en el servidor.");
+            return response.text();
+        })
+        .then(data => {
+            $('#addProductoModal').modal('hide');
+            alert("Producto guardado correctamente.");
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Hubo un error al guardar el producto.");
+        });
+    });
+});
+</script>
+{% endblock %}

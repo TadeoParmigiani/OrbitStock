@@ -26,6 +26,11 @@
   <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
   <!-- summernote -->
   <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
+  <!-- DataTables CSS -->
+<link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+
     <!-- fullCalendar -->
     <link rel="stylesheet" href="{% static 'plugins/fullcalendar/main.css' %}">
     <!-- Idioma español -->
@@ -50,18 +55,35 @@
     </ul>
 
     <ul class="navbar-nav ml-auto">
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">1</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-      </li>
+<li class="nav-item dropdown">
+  <a class="nav-link" data-toggle="dropdown" href="#">
+    <i class="fas fa-bell"></i>
+    {% if stock_bajo %}
+      <span class="badge badge-danger navbar-badge">{{ stock_bajo|length }}</span>
+    {% endif %}
+  </a>
+  <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+    <span class="dropdown-header">
+      {{ stock_bajo|length }} producto{{ stock_bajo|length|pluralize }} con stock bajo
+    </span>
+    <div class="dropdown-divider"></div>
+
+    {% for producto in stock_bajo %}
+      <a href="#" class="dropdown-item">
+        <i class="fas fa-exclamation-circle mr-2 text-danger"></i>
+        <strong>{{ producto.nombre }}</strong> ({{ producto.stock_inicial }} u.)
+        <span class="float-right text-muted text-sm">Stock crítico</span>
+      </a>
+      <div class="dropdown-divider"></div>
+    {% endfor %}
+
+    <a href="{% url 'productList' %}" class="dropdown-item dropdown-footer text-primary">
+      Ver todos los productos
+    </a>
+  </div>
+</li>
+
+
       <li class="nav-item">
         <a class="nav-link" data-widget="fullscreen" href="#" role="button">
           <i class="fas fa-expand-arrows-alt"></i>
@@ -78,7 +100,7 @@
 
   <!-- Sidebar -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="index3.html" class="brand-link">
+    <a href="/home/list" class="brand-link">
       <img src="{% static 'dist/img/orbit.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">StockOrbit</span>
     </a>
@@ -103,13 +125,13 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           {% if request.user.role == "admin" %}
             <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/home/list" class="nav-link">
               <i class="nav-icon fas fa-home"></i>
               <p>inicio</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/products/list" class="nav-link">
               <i class="nav-icon fas fa-layer-group"></i>
               <p>Productos</p>
             </a>
@@ -121,15 +143,15 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/sales/list" class="nav-link">
               <i class="nav-icon fas fa-tags"></i>
               <p>Ventas</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-shopping-cart"></i>
-              <p>Compras</p>
+            <a href="/customers/list" class="nav-link">
+              <i class="nav-icon fas fa-user-tie"></i>
+              <p>Clientes</p>
             </a>
           </li>
           <li class="nav-item">
@@ -162,13 +184,13 @@
           </li>
           {% elif request.user.role == "employee" %}
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/home/list" class="nav-link">
               <i class="nav-icon fas fa-home"></i>
               <p>Inicio</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/products/list" class="nav-link">
               <i class="nav-icon fas fa-layer-group"></i>
               <p>Productos</p>
             </a>
@@ -180,15 +202,15 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/sales/list" class="nav-link">
               <i class="nav-icon fas fa-tags"></i>
               <p>Ventas</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-shopping-cart"></i>
-              <p>Compras</p>
+            <a href="/customers/list" class="nav-link">
+              <i class="nav-icon fas fa-user-tie"></i>
+              <p>Clientes</p>
             </a>
           </li>
           <li class="nav-item">
@@ -255,6 +277,12 @@
 <!-- fullCalendar 2.2.5 -->
 <script src="{% static 'plugins/fullcalendar/main.js' %}"></script>
 <script src="../plugins/moment/moment.min.js"></script>
+<!-- DataTables JS -->
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+
 <script>
   $(function () {
 
@@ -358,5 +386,28 @@
     })
   })
 </script>
+<script>
+  $(function () {
+    $('#mi-tabla').DataTable({
+      "responsive": true,
+      "autoWidth": false,
+      "language": {
+        "search": "Buscar:",
+        "lengthMenu": "Mostrar _MENU_ registros por página",
+        "zeroRecords": "No se encontraron resultados",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoEmpty": "No hay registros disponibles",
+        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+        "paginate": {
+          "first": "Primero",
+          "last": "Último",
+          "next": "Siguiente",
+          "previous": "Anterior"
+        }
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

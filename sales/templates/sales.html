@@ -1,0 +1,489 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Gestión de Ventas</h1>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Listado de Ventas -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ventas</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addVentaModal">
+                                <i class="fas fa-plus"></i> Nueva Venta
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <table id="mi-tabla" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Productos</th>
+                                    <th>Método de Pago</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in ventas %}
+                                <tr>
+                                    <td>{{ venta.cliente.nombre }}</td>
+                                    <td>{{ venta.fecha }}</td>
+                                    <td>${{ venta.total }}</td>
+                                    <td>
+                                        <!-- Botón para abrir modal de productos -->
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#productosModal{{ venta.id }}">
+                                            Ver productos
+                                        </button>
+
+                                        <!-- Modal de productos -->
+<!-- Modal: Ver productos de la venta -->
+<div class="modal fade" id="productosModal{{ venta.id }}" tabindex="-1" role="dialog" aria-labelledby="productosModalLabel{{ venta.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="productosModalLabel{{ venta.id }}">
+          Productos de la venta #{{ venta.id }}
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in venta.detalles.all %}
+              <tr data-producto-id="{{ item.producto.id }}">
+              <td>{{ item.producto.nombre }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>${{ item.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">No hay productos en esta venta.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary editarProductosBtn" data-venta-id="{{ venta.id }}">
+          Editar productos
+        </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+                                    <!-- Modal: Editar productos -->
+<div class="modal fade" id="editarProductosModal" tabindex="-1" role="dialog" aria-labelledby="editarProductosModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <form method="post" action="{% url 'sale_update_products' 0 %}" id="formEditarProductos">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar productos</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="editarProductosBody">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+              </tr>
+            </thead>
+            <tbody id="editarProductosTableBody">
+              <!-- Se insertan con JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar cambios</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+                                    </td>
+                                    <td>{{ venta.metodo_pago }}</td>
+                                    <td>
+                                        <!-- Botón editar -->
+                                        <button class="btn btn-warning btn-sm edit-venta-btn"
+                                            data-id="{{ venta.id }}"
+                                            data-cliente-id="{{ venta.cliente.id }}"
+                                            data-fecha="{{ venta.fecha|date:'Y-m-d' }}"
+                                            data-metodo-pago="{{ venta.metodo_pago }}"
+                                            data-toggle="modal"
+                                            data-target="#editVentaModal">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+
+                                        <!-- Botón eliminar -->
+                                        <form method="POST" action="" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ venta.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Nueva Venta -->
+<div class="modal fade" id="addVentaModal" tabindex="-1" role="dialog" aria-labelledby="addVentaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" action="{% url 'saleCreate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addVentaModalLabel">Nueva Venta</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="cliente">Cliente</label>
+                        <select class="form-control" id="cliente" name="cliente" required>
+                            <option value="" disabled selected>Seleccione un cliente</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" class="form-control" id="fecha" name="fecha" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="metodo_pago">Método de Pago</label>
+                        <select class="form-control" id="metodo_pago" name="metodo_pago" required>
+                            <option value="" disabled selected>Seleccione un método</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Productos</label>
+                        <div id="productosContainer">
+                            <div class="form-row align-items-center mb-2 producto-item">
+                                <div class="col-7">
+                                    <select class="form-control" name="producto[]" required>
+                                        <option value="" disabled selected>Seleccione producto</option>
+                                        {% for producto in productos %}
+                                            <option value="{{ producto.id }}">{{ producto.nombre }} - ${{ producto.precio_venta }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" min="1" required>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" class="btn btn-danger btn-sm remove-producto">&times;</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-info btn-sm mt-2" id="addProducto">+ Agregar producto</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total">Total</label>
+                        <input type="number" id="total" name="total" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Venta -->
+<div class="modal fade" id="editVentaModal" tabindex="-1" role="dialog" aria-labelledby="editVentaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" id="editVentaForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVentaModalLabel">Editar Venta</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-venta-id" name="id">
+
+                    <div class="form-group">
+                        <label for="edit-metodo-pago">Método de Pago</label>
+                        <select class="form-control" id="edit-metodo-pago" name="metodo_pago" required>
+                            <option value="">Seleccione un método</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione un método de pago válido.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-cliente">Cliente</label>
+                        <select class="form-control" id="edit-cliente" name="id_cliente" required>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}">{{ cliente.nombre }} {{ cliente.apellido }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Seleccione un cliente válido.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-fecha">Fecha</label>
+                        <input type="date" class="form-control" id="edit-fecha" name="fecha" required>
+                        <div class="invalid-feedback">Ingrese una fecha válida.</div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Validación Bootstrap
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            const forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.forEach.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Modal edición general de venta
+        document.querySelectorAll('.edit-venta-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const ventaId = this.getAttribute('data-id');
+                const clienteId = this.getAttribute('data-cliente-id');
+                const fecha = this.getAttribute('data-fecha');
+                const metodoPago = this.getAttribute('data-metodo-pago');
+
+                document.getElementById('edit-venta-id').value = ventaId;
+                document.getElementById('edit-cliente').value = clienteId;
+                document.getElementById('edit-fecha').value = fecha;
+                document.getElementById('edit-metodo-pago').value = metodoPago;
+
+                const form = document.getElementById('editVentaForm');
+                form.action = `/sales/update/${ventaId}/`;
+            });
+        });
+
+// Modal edición de productos de una venta
+document.querySelectorAll('.editarProductosBtn').forEach(function (editarBtn) {
+    editarBtn.addEventListener("click", function () {
+        const ventaId = this.getAttribute("data-venta-id");
+        const formEditar = document.getElementById("formEditarProductos");
+        const editarBody = document.getElementById("editarProductosBody");
+
+        // Ocultar modal productos abierto para que no se superpongan
+        $(`#productosModal${ventaId}`).modal('hide');
+        formEditar.action = `/sales/update-products/${ventaId}/`;
+
+        const modal = document.getElementById(`productosModal${ventaId}`);
+        const filas = modal.querySelector("tbody").querySelectorAll("tr");
+
+        let html = `
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        filas.forEach(row => {
+            const productoId = row.getAttribute("data-producto-id");
+            const nombre = row.children[0].innerText.trim();
+            const cantidad = row.children[1].innerText.trim();
+            const subtotal = parseFloat(row.children[2].innerText.replace('$', ''));
+            const precioUnitario = (subtotal / cantidad).toFixed(2);
+
+html += `
+  <tr>
+    <td>
+      ${nombre}
+      <input type="hidden" name="producto[]" value="${productoId}">
+    </td>
+    <td>
+      <input type="number" name="cantidad[]" class="form-control cantidad-input" value="${cantidad}" min="1" required>
+    </td>
+    <td>$${precioUnitario}</td>
+    <td class="subtotal-cell">$${subtotal.toFixed(2)}</td>
+    <input type="hidden" name="subtotal[]" value="${subtotal.toFixed(2)}">
+  </tr>
+`;
+
+        });
+
+        html += `</tbody></table><div class="text-right font-weight-bold">Total: $<span id="totalProductosEditar">0.00</span></div>`;
+
+        editarBody.innerHTML = html;
+
+        actualizarTotalEditarProductos();
+
+        editarBody.querySelectorAll(".cantidad-input").forEach(input => {
+input.addEventListener("input", function () {
+    const tr = this.closest("tr");
+    const cantidad = parseFloat(this.value) || 0;
+    const precioText = tr.children[2].innerText.replace('$', '');
+    const precio = parseFloat(precioText) || 0;
+    const subtotal = cantidad * precio;
+    tr.querySelector(".subtotal-cell").textContent = `$${subtotal.toFixed(2)}`;
+    
+    const inputSubtotal = tr.querySelector('input[name="subtotal[]"]');
+    if(inputSubtotal){
+        inputSubtotal.value = subtotal.toFixed(2);
+    }
+
+    actualizarTotalEditarProductos();
+});
+        });
+
+        $("#editarProductosModal").modal("show");
+    });
+});
+
+    });
+
+    function actualizarTotalEditarProductos() {
+        let total = 0;
+        document.querySelectorAll("#editarProductosBody .subtotal-cell").forEach(cell => {
+            const valor = parseFloat(cell.textContent.replace('$', '')) || 0;
+            total += valor;
+        });
+        document.getElementById("totalProductosEditar").textContent = total.toFixed(2);
+    }
+
+    // Total en formulario nuevo o edición general
+    function calcularTotal() {
+        let total = 0;
+        document.querySelectorAll('#productosContainer .producto-item').forEach(function (item) {
+            const select = item.querySelector('select');
+            const cantidadInput = item.querySelector('input[name="cantidad[]"]');
+            const cantidad = parseInt(cantidadInput.value) || 0;
+            let precio = 0;
+            if (select && select.selectedOptions.length > 0) {
+                const texto = select.selectedOptions[0].textContent;
+                const match = texto.match(/\$(\d+(\.\d+)?)/);
+                if (match) {
+                    precio = parseFloat(match[1]);
+                }
+            }
+            total += precio * cantidad;
+        });
+        document.getElementById('total').value = total.toFixed(2);
+    }
+
+    // Eventos para recalcular total en formulario principal
+    document.addEventListener('input', function (e) {
+        if (e.target.closest('#productosContainer')) {
+            calcularTotal();
+        }
+    });
+
+    document.addEventListener('change', function (e) {
+        if (e.target.closest('#productosContainer')) {
+            calcularTotal();
+        }
+    });
+
+    // Agregar producto nuevo en formulario principal
+    document.getElementById('addProducto').addEventListener('click', function () {
+        const container = document.getElementById('productosContainer');
+        const newItem = container.querySelector('.producto-item').cloneNode(true);
+        newItem.querySelector('select').selectedIndex = 0;
+        newItem.querySelector('input[name="cantidad[]"]').value = '';
+        container.appendChild(newItem);
+        calcularTotal();
+    });
+
+    // Eliminar producto en formulario principal
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-producto')) {
+            const items = document.querySelectorAll('#productosContainer .producto-item');
+            if (items.length > 1) {
+                e.target.closest('.producto-item').remove();
+                calcularTotal();
+            }
+        }
+    });
+</script>
+
+
+
+
+
+{% endblock %}

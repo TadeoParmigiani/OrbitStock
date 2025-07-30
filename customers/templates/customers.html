@@ -1,0 +1,269 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<!-- Encabezado de contenido -->
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Gestión de Clientes</h1>
+    </div>
+</div>
+
+<!-- Contenido principal -->
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Listado de Clientes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Clientes</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addClienteModal">
+                              <i class="fas fa-plus"></i> Nuevo Cliente
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <table id="mi-tabla" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>DNI/CUIT</th>
+                                    <th>Teléfono</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>Dirección</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ cliente.nombre }}</td>
+                                    <td>{{ cliente.dni_cuit }}</td>
+                                    <td>{{ cliente.telefono }}</td>
+                                    <td>{{ cliente.correo_electronico }}</td>
+                                    <td>{{ cliente.direccion }}</td>
+                                    <td>
+                                        <button class="btn btn-warning btn-sm edit-cliente-btn"
+                                            data-id="{{ cliente.id }}"
+                                            data-nombre="{{ cliente.nombre }}"
+                                            data-dni="{{ cliente.dni_cuit }}"
+                                            data-telefono="{{ cliente.telefono }}"
+                                            data-correo="{{ cliente.correo_electronico }}"
+                                            data-direccion="{{ cliente.direccion }}"
+                                            data-toggle="modal"
+                                            data-target="#editClienteModal">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+
+                                        <form method="POST" action="{% url 'clientDelete' %}" class="delete-cliente-form d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id" value="{{ cliente.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Agregar Cliente -->
+<div class="modal fade" id="addClienteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" action="{% url 'clientCreate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>DNI/CUIT</label>
+                        <input type="text" name="dni_cuit" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" name="telefono" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" name="correo_electronico" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" name="direccion" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Editar Cliente -->
+<div class="modal fade" id="editClienteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="needs-validation" novalidate method="POST" action="{% url 'clientUpdate' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-cliente-id" name="id">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="edit-cliente-nombre" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>DNI/CUIT</label>
+                        <input type="text" id="edit-cliente-dni" name="dni_cuit" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="edit-cliente-telefono" name="telefono" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" id="edit-cliente-correo" name="correo_electronico" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Dirección</label>
+                        <input type="text" id="edit-cliente-direccion" name="direccion" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Cargar datos en el modal de edición
+    document.querySelectorAll('.edit-cliente-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            document.getElementById("edit-cliente-id").value = this.dataset.id;
+            document.getElementById("edit-cliente-nombre").value = this.dataset.nombre;
+            document.getElementById("edit-cliente-dni").value = this.dataset.dni;
+            document.getElementById("edit-cliente-telefono").value = this.dataset.telefono;
+            document.getElementById("edit-cliente-correo").value = this.dataset.correo;
+            document.getElementById("edit-cliente-direccion").value = this.dataset.direccion;
+        });
+    });
+
+     // Validación general
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            let valid = true;
+
+            // Validar nombre (obligatorio)
+            const nombreInput = form.querySelector('input[name="nombre"]');
+            if (!nombreInput.value.trim()) {
+                nombreInput.classList.add('is-invalid');
+                valid = false;
+            } else {
+                nombreInput.classList.remove('is-invalid');
+            }
+
+            // Validar teléfono (si se completó)
+            const telefonoInput = form.querySelector('input[name="telefono"]');
+            if (telefonoInput && telefonoInput.value.trim()) {
+                const phoneRegex = /^[0-9\s\-()+]+$/;
+                if (!phoneRegex.test(telefonoInput.value.trim())) {
+                    telefonoInput.classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    telefonoInput.classList.remove('is-invalid');
+                }
+            } else {
+                telefonoInput.classList.remove('is-invalid');
+            }
+
+            // Validar correo electrónico (si se completó)
+            const emailInput = form.querySelector('input[name="correo_electronico"]');
+            if (emailInput && emailInput.value.trim()) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    emailInput.classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                }
+            } else {
+                emailInput.classList.remove('is-invalid');
+            }
+            // Validar DNI/CUIT (si se completó)
+            const dniInput = form.querySelector('input[name="dni_cuit"]');
+            if (dniInput && dniInput.value.trim() && dniInput.value.trim().length < 5) {
+                dniInput.classList.add('is-invalid');
+                valid = false;
+            } else {
+                dniInput.classList.remove('is-invalid');
+            }
+            // Dirección: si se completa, que no sea solo espacios
+            const direccionInput = form.querySelector('input[name="direccion"]');
+            if (direccionInput && direccionInput.value.trim().length > 0 && direccionInput.value.trim().length < 5) {
+                direccionInput.classList.add('is-invalid');
+                valid = false;
+            } else {
+                direccionInput.classList.remove('is-invalid');
+            }
+            // Detener envío si hay errores
+            if (!valid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, false);
+    });
+    // Confirmar antes de eliminar un cliente
+    const deleteForms = document.querySelectorAll('.delete-cliente-form');
+    deleteForms.forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            const confirmed = confirm("¿Estás seguro de que deseas eliminar este cliente?");
+            if (!confirmed) {
+                event.preventDefault();
+            }
+        });
+    });
+
+});
+</script>
+
+
+{% endblock %}
