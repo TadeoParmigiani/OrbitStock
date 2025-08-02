@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'index',
     'event_calendar',
     'home',
+    'backup',
 ]
 
 MIDDLEWARE = [

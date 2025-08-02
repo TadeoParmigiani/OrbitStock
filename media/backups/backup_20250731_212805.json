@@ -1,0 +1,117 @@
+{
+  "timestamp": "20250731_212805",
+  "created_by": "admin",
+  "description": "ejemplo1",
+  "data": {
+    "products.Producto": [
+      {
+        "model": "products.producto",
+        "pk": 7,
+        "fields": {
+          "nombre": "Johnn_Frusciante",
+          "descripcion": "555",
+          "codigo": "34343",
+          "categoria": 2,
+          "precio_compra": "334.00",
+          "precio_venta": "34434.00",
+          "estado": false,
+          "stock_inicial": 4,
+          "imagen": ""
+        }
+      },
+      {
+        "model": "products.producto",
+        "pk": 8,
+        "fields": {
+          "nombre": "faca",
+          "descripcion": "222dd",
+          "codigo": "3333111",
+          "categoria": 3,
+          "precio_compra": "122.00",
+          "precio_venta": "1112.00",
+          "estado": true,
+          "stock_inicial": 3,
+          "imagen": "products/img/WhatsApp_Image_2025-03-18_at_10.04.14_1a5cc9da.jpg"
+        }
+      }
+    ],
+    "users.CustomUser": [
+      {
+        "model": "users.customuser",
+        "pk": 1,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$LVZb1wpQhd6juLCIUAiGGr$BOCXPN9hGNQB6pmyFx++YyZuUEDMcAVfDgmE0E9gHx0=",
+          "last_login": "2025-08-01T00:27:50.745Z",
+          "is_superuser": true,
+          "username": "admin",
+          "first_name": "",
+          "last_name": "",
+          "email": "admin@gmail.com",
+          "is_staff": true,
+          "is_active": true,
+          "date_joined": "2025-05-28T21:48:21.762Z",
+          "role": "admin",
+          "groups": [],
+          "user_permissions": []
+        }
+      },
+      {
+        "model": "users.customuser",
+        "pk": 2,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$dDwahwEo3QjysoEbAGAE27$vcI5cYjllqaEr7YImpPGGOAkiBRJnuJYaH3tY7LZevA=",
+          "last_login": "2025-05-29T16:26:55.735Z",
+          "is_superuser": false,
+          "username": "juanchi",
+          "first_name": "",
+          "last_name": "",
+          "email": "juan@gmail.com",
+          "is_staff": false,
+          "is_active": true,
+          "date_joined": "2025-05-29T13:59:15.478Z",
+          "role": "employee",
+          "groups": [],
+          "user_permissions": []
+        }
+      },
+      {
+        "model": "users.customuser",
+        "pk": 3,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$V7ujbUD9vqAR1ktrtXORdO$0zWzBMWdTJLE9NS/0b6EMwrb6iDwaAkJ8CdiEOrfZEk=",
+          "last_login": null,
+          "is_superuser": false,
+          "username": "Tadeo",
+          "first_name": "",
+          "last_name": "",
+          "email": "tadeoparmi2001@gmail.com",
+          "is_staff": false,
+          "is_active": false,
+          "date_joined": "2025-05-29T14:18:12.345Z",
+          "role": "employee",
+          "groups": [],
+          "user_permissions": []
+        }
+      },
+      {
+        "model": "users.customuser",
+        "pk": 4,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$pKn57EXxUUDOJ56NUr3OIZ$tg21+Hi6kD8ZkqlzvAWjMJs09eNoQHEHOcd3aV+lbeg=",
+          "last_login": null,
+          "is_superuser": false,
+          "username": "jose",
+          "first_name": "",
+          "last_name": "",
+          "email": "juan@gmail.com",
+          "is_staff": false,
+          "is_active": false,
+          "date_joined": "2025-05-29T16:19:55.568Z",
+          "role": "employee",
+          "groups": [],
+          "user_permissions": []
+        }
+      }
+    ]
+  }
+}
