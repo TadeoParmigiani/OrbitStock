@@ -61,6 +61,7 @@ def create_backup(request):
                 'products.Producto',          # Depende de Categoria
                 'event_calendar.Event',       # Depende de CustomUser
                 'sales.Venta',               # Depende de Producto, Cliente, etc.
+                'Sales.DetalleVenta',
             ]
             
             for model_name in models_to_backup:
@@ -138,6 +139,7 @@ def restore_backup(request):
                 'products.Producto',          # Luego productos (depende de categorías)
                 'event_calendar.Event',       # Luego eventos (depende de usuarios)
                 'sales.Venta',               # Por último ventas (depende de productos y clientes)
+                'Sales.DetalleVenta',
             ]
             
             restored_count = 0

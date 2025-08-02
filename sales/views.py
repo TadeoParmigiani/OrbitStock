@@ -120,22 +120,49 @@ def sale_update_products(request, sale_id):
             messages.error(request, "Formato inválido en productos, cantidades o subtotales.")
             return redirect('SaleList')
 
+        # 🔥 PASO 1: VALIDAR STOCK ANTES DE MODIFICAR NADA
+        # Primero calculamos el stock disponible considerando lo que ya está en la venta
+        detalles_actuales = list(venta.detalles.all())  # Convertir a lista para evitar problemas
+        
+        for i in range(len(productos_ids)):
+            producto = get_object_or_404(Producto, id=productos_ids[i])
+            nueva_cantidad = cantidades[i]
+            
+            # Buscar si este producto ya estaba en la venta anterior
+            cantidad_anterior = 0
+            for detalle in detalles_actuales:
+                if detalle.producto_id == productos_ids[i]:
+                    cantidad_anterior = detalle.cantidad
+                    break
+            
+            # Stock disponible = stock actual + lo que teníamos reservado antes
+            stock_disponible = producto.stock_inicial + cantidad_anterior
+            
+            if stock_disponible < nueva_cantidad:
+                messages.error(request, 
+                    f"Stock insuficiente para {producto.nombre}. "
+                    f"Cantidad solicitada: {nueva_cantidad}, "
+                    f"Stock disponible: {stock_disponible} "
+                    f"(actual: {producto.stock_inicial} + en venta anterior: {cantidad_anterior})")
+                return redirect('SaleList')
+
+        # 🔥 PASO 2: SI LLEGAMOS AQUÍ, TODO ESTÁ OK - AHORA SÍ MODIFICAMOS
+        
         # Revertir stock anterior
-        for detalle in venta.detalles.all():
+        for detalle in detalles_actuales:
             detalle.producto.stock_inicial += detalle.cantidad
             detalle.producto.save()
 
-        venta.detalles.all().delete()  # Borrar detalles anteriores
+        # Borrar detalles anteriores
+        venta.detalles.all().delete()
 
+        # Crear nuevos detalles
         total_venta = Decimal('0.00')
 
         for i in range(len(productos_ids)):
             producto = get_object_or_404(Producto, id=productos_ids[i])
-
-            if producto.stock_inicial < cantidades[i]:
-                messages.error(request, f"Stock insuficiente para {producto.nombre}. Disponible: {producto.stock_inicial}")
-                return redirect('SaleList')
-
+            
+            # Descontar nuevo stock
             producto.stock_inicial -= cantidades[i]
             producto.save()
 
@@ -154,6 +181,7 @@ def sale_update_products(request, sale_id):
         venta.save()
 
         messages.success(request, "Productos de la venta actualizados correctamente.")
+        
     except Exception as e:
         messages.error(request, f"Error al actualizar venta: {e}")
 
