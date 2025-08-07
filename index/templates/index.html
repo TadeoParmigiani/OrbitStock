@@ -175,9 +175,17 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="pages/layout/top-nav.html" class="nav-link">
+                <a href="{% url 'reportsList' 'stock' %}" class="nav-link">  <!-- Nuevo enlace dinámico -->
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Reporte 1</p>
+                  <p>Reporte de Stock</p>
+                </a>
+              </li>
+            </ul>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'reportsList' 'ventas' %}" class="nav-link">  <!-- Nuevo enlace dinámico -->
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Reporte de Ventas</p>
                 </a>
               </li>
             </ul>

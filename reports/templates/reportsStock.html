@@ -1,0 +1,220 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Gestión de Reportes Stock</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/home/list">Inicio</a></li>
+                    <li class="breadcrumb-item active">Reportes Stock</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        
+        <!-- Generar Nuevo Reporte -->
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Generar Nuevo Reporte de Stock
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'create_report' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="tipo" value="stock">
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Fecha de Inicio</label>
+                                <input type="date" name="fecha_inicio" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Fecha de Fin</label>
+                                <input type="date" name="fecha_fin" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Formato</label>
+                                <select name="formato" class="form-control" required>
+                                    <option value="">Seleccionar formato</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Descripción (Opcional)</label>
+                                <input type="text" name="descripcion" class="form-control" placeholder="Descripción del reporte">
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-group" style="width: 100%;">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    <i class="fas fa-file-download mr-2"></i>Generar y Descargar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Historial de Reportes -->
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history mr-2"></i>
+                    Historial de Reportes de Stock
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if reports_history %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Descripción</th>
+                                <th>Período</th>
+                                <th>Formato</th>
+                                <th>Estado</th>
+                                <th>Registros</th>
+                                <th>Monto Total</th>
+                                <th>Fecha Creación</th>
+                                <th>Creado Por</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports_history %}
+                            <tr>
+                                <td>{{ report.id }}</td>
+                                <td>{{ report.descripcion|default:"Sin descripción" }}</td>
+                                <td>{{ report.get_periodo }}</td>
+                                <td>
+                                    <span class="badge {% if report.formato == 'pdf' %}badge-danger{% else %}badge-success{% endif %}">
+                                        {{ report.get_formato_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if report.estado == 'completado' %}
+                                        <span class="badge badge-success">{{ report.get_estado_display }}</span>
+                                    {% elif report.estado == 'pendiente' %}
+                                        <span class="badge badge-warning">{{ report.get_estado_display }}</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">{{ report.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ report.total_registros }}</td>
+                                <td>${{ report.monto_total|floatformat:2 }}</td>
+                                <td>{{ report.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                <td>{{ report.creado_por.username }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        {% if report.estado == 'completado' %}
+                                            <!-- Vista Previa (solo PDF) -->
+                                            {% if report.formato == 'pdf' %}
+                                            <a href="{% url 'preview_report' report.id %}" 
+                                               class="btn btn-sm btn-info" 
+                                               target="_blank" 
+                                               title="Vista previa">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <!-- Descargar -->
+                                            <a href="{% url 'download_report' report.id %}" 
+                                               class="btn btn-sm btn-success" 
+                                               title="Descargar">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <!-- Eliminar -->
+                                        <button type="button" 
+                                                class="btn btn-sm btn-danger" 
+                                                onclick="confirmDelete('{{ report.id }}')" 
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay reportes generados aún.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar este reporte? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'delete_report' %}" id="deleteForm" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="report_id" id="reportIdToDelete">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(reportId) {
+    document.getElementById('reportIdToDelete').value = reportId;
+    $('#deleteModal').modal('show');
+}
+
+// Establecer fecha máxima como hoy
+document.addEventListener('DOMContentLoaded', function() {
+    var today = new Date().toISOString().split('T')[0];
+    var dateInputs = document.querySelectorAll('input[type="date"]');
+    for (var i = 0; i < dateInputs.length; i++) {
+        dateInputs[i].max = today;
+    }
+});
+</script>
+{% endblock %}
