@@ -135,13 +135,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Para producción
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-] if DEBUG else []
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuración de archivos estáticos para producción
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuración diferente para desarrollo vs producción
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+    ]
+else:
+    # Configuración para producción
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Configuración adicional para WhiteNoise
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
 # Media files
 MEDIA_URL = '/media/'
