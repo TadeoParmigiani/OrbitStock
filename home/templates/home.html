@@ -1,0 +1,131 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .welcome-section {
+        text-align: center;
+        padding: 60px 20px 40px;
+    }
+
+    .welcome-section h1 {
+        font-size: 3.2rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 10px;
+    }
+
+    .welcome-section p {
+        font-size: 1.2rem;
+        color: #b0b0b0;
+        max-width: 700px;
+        margin: 0 auto 30px;
+    }
+
+    .logo-img {
+        width: 80px;
+        height: auto;
+        margin-bottom: 20px;
+        opacity: 0.95;
+    }
+
+    .card-box {
+        background-color: #2c2f36;
+        border: 1px solid #3c3f45;
+        border-radius: 15px;
+        padding: 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        color: #fff;
+    }
+
+    .card-box:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-box i {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+
+    .btn-custom {
+        border-radius: 25px;
+        font-weight: 600;
+        padding: 8px 20px;
+        transition: 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="container">
+    <div class="welcome-section">
+        <img src="{% static 'dist/img/orbit.png' %}" alt="StockOrbit Logo" class="logo-img">
+        <h1>Bienvenido a StockOrbit</h1>
+        <p>Accedé de manera rápida y ordenada a todas las funcionalidades del sistema de gestión. Tu centro de control para productos, clientes, ventas y más.</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+
+        <!-- Fila 1 -->
+        <div class="col-md-4">
+            <div class="card card-box text-center">
+                <i class="fas fa-boxes text-info"></i>
+                <h5 class="mt-3">Productos</h5>
+                <p>Gestioná el inventario de productos.</p>
+                <a href="/products/list" class="btn btn-outline-info btn-custom">Ir a productos</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-box text-center">
+                <i class="fas fa-users text-success"></i>
+                <h5 class="mt-3">Clientes</h5>
+                <p>Administrá tu base de clientes.</p>
+                <a href="/customers/list" class="btn btn-outline-success btn-custom">Ver clientes</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-box text-center">
+                <i class="fas fa-shopping-cart text-danger"></i>
+                <h5 class="mt-3">Ventas</h5>
+                <p>Registrá y visualizá tus ventas.</p>
+                <a href="/sales/list" class="btn btn-outline-danger btn-custom">Ir a ventas</a>
+            </div>
+        </div>
+
+        <!-- Fila 2 -->
+        <div class="col-md-4">
+            <div class="card card-box text-center">
+                <i class="fas fa-tags text-secondary"></i>
+                <h5 class="mt-3">Categorías</h5>
+                <p>Organizá los productos por categoría.</p>
+                <a href="/categories/list" class="btn btn-outline-secondary btn-custom">Ver categorías</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-box text-center">
+                <i class="fas fa-calendar-alt text-primary"></i>
+                <h5 class="mt-3">Calendario</h5>
+                <p>Consultá eventos y recordatorios.</p>
+                <a href="/event_calendar/list" class="btn btn-outline-primary btn-custom">Ver calendario</a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-box text-center">
+                <i class="fas fa-chart-line text-warning"></i>
+                <h5 class="mt-3">Reportes</h5>
+                <p>Visualizá informes y estadísticas.</p>
+                <a href="/reports/list" class="btn btn-outline-warning btn-custom">Ir a reportes</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

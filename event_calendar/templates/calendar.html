@@ -2,64 +2,221 @@
 {% load static %}
 
 {% block content %}
-<section class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1>Calendar</h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Calendar</li>
-          </ol>
-        </div>
-      </div>
-    </div><!-- /.container-fluid -->
-  </section>
 
-<!-- Main content -->
-    <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card card-primary">
-              <div class="card-body p-0">
-                <!-- CALENDARIO -->
-                <div id="calendar"></div>
-              </div>
-            </div>
+<!-- Título y breadcrumbs -->
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Calendario</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+          <li class="breadcrumb-item active">Calendario</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contenido principal -->
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-primary">
+          <div class="card-body p-3">
+            <div id="calendar"></div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-  <!-- /.content -->
-     <style>
-    .fc-daygrid-day-number {
-      color: white !important;
+<!-- Modal -->
+<div class="modal fade" id="modalAgregarEvento" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <form id="formEvento">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitulo">Agregar evento</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="idEvento">
+
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" class="form-control" id="tituloEvento" required>
+          </div>
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" class="form-control" id="fechaEvento" required>
+          </div>
+          <div class="form-group">
+            <label>Hora (opcional)</label>
+            <input type="time" class="form-control" id="horaEvento">
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <input type="color" class="form-control" id="colorEvento" value="#007bff">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success" id="btnGuardar">Guardar</button>
+          <button type="button" class="btn btn-danger d-none" id="btnEliminar">Eliminar</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<!-- jQuery y Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Estilos -->
+<style>
+  .fc-daygrid-day-number,
+  .fc-col-header-cell-cushion {
+    color: white !important;
+  }
+
+  .fc-event, .fc-event a {
+    color: white !important;
+  }
+</style>
+
+<!-- Script de calendario -->
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
     }
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        events: [
-          {
-            title: 'Evento de ejemplo',
-            start: new Date().toISOString().split('T')[0]
+    return cookieValue;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      events: '/calendar/events/',
+      selectable: true,
+
+      // Click en un día: crear nuevo evento
+      dateClick: function (info) {
+        document.getElementById('formEvento').reset();
+        document.getElementById('modalTitulo').innerText = 'Agregar evento';
+        document.getElementById('fechaEvento').value = info.dateStr;
+        document.getElementById('idEvento').value = '';
+        document.getElementById('btnEliminar').classList.add('d-none');
+        $('#modalAgregarEvento').modal('show');
+      },
+
+      // Click en un evento: editar/eliminar
+      eventClick: function (info) {
+        const evento = info.event;
+        document.getElementById('tituloEvento').value = evento.title;
+        document.getElementById('fechaEvento').value = evento.startStr.split('T')[0];
+        document.getElementById('horaEvento').value = evento.startStr.includes('T') ? evento.startStr.split('T')[1].substring(0, 5) : '';
+        document.getElementById('colorEvento').value = evento.backgroundColor;
+        document.getElementById('idEvento').value = evento.id;
+
+        document.getElementById('modalTitulo').innerText = 'Editar evento';
+        document.getElementById('btnEliminar').classList.remove('d-none');
+        $('#modalAgregarEvento').modal('show');
+
+        document.getElementById('btnEliminar').onclick = function () {
+          if (confirm("¿Eliminar este evento?")) {
+            fetch('/calendar/delete/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: JSON.stringify({ id: evento.id })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'ok') {
+                evento.remove();
+                $('#modalAgregarEvento').modal('hide');
+              } else {
+                alert("Error al eliminar el evento");
+              }
+            });
           }
-        ]
-      });
-      calendar.render();
+        };
+      }
     });
-  </script>
-  
-  {% endblock %}
+
+    calendar.render();
+
+    // Crear o modificar evento (formulario)
+    document.getElementById('formEvento').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const id = document.getElementById('idEvento').value;
+      const title = document.getElementById('tituloEvento').value;
+      const date = document.getElementById('fechaEvento').value;
+      const time = document.getElementById('horaEvento').value;
+      const color = document.getElementById('colorEvento').value;
+
+      let start = date;
+      if (time) start += 'T' + time;
+
+      const url = id ? '/calendar/update/' : '/calendar/new/';
+      const payload = {
+        title: title,
+        start: start,
+        color: color,
+      };
+      if (id) payload.id = id;
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          calendar.refetchEvents();
+          $('#modalAgregarEvento').modal('hide');
+          document.getElementById('formEvento').reset();
+        } else {
+          alert("Error al guardar el evento");
+        }
+      });
+    });
+  });
+</script>
+
+
+{% endblock %}

@@ -19,16 +19,19 @@ from django.urls import path
 from django.conf.urls import include
 from users import views as users_views
 from index import views as index_views
-
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
      path('admin/', admin.site.urls),
-#     path('sales/', include('sales.urls')),
-#     path('reports/', include('reports.urls')),
-#     path('products/', include('products.urls')),
-#     path('customers/', include('customers.urls')),
+     path('sales/', include('sales.urls')),
+     path('backup/', include('backup.urls')),
+     path('reports/', include('reports.urls')),
+     path('products/', include('products.urls')),
+     path('customers/', include('customers.urls')),
      path('categories/', include('categories.urls')),
      path('users/', include('users.urls')),
      path('', users_views.login, name='login'),
      path('index', index_views.index, name='index'),
      path('calendar/', include('event_calendar.urls')),
-]
+     path('home/', include('home.urls')),
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

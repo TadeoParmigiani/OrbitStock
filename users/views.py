@@ -18,11 +18,11 @@ def login(request):
         if user is not None:
             auth_login(request, user)
             request.session['username'] = user.username
-            return redirect('/index') 
+            return redirect('HomeList') 
         else:
             messages.error(request, 'Credenciales incorrectas')
-            return render(request, 'login.html')
-    return render(request, 'login.html')
+            return render(request, 'login.html', {})
+    return render(request, 'login.html', {})
 
 
 

@@ -1,0 +1,288 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Gestión de Respaldos</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/home/list">Inicio</a></li>
+                    <li class="breadcrumb-item active">Respaldos</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        
+        <!-- Crear Backup -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-database mr-2"></i>
+                            Crear Nuevo Respaldo
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="text-muted">
+                                    Genera un respaldo completo de la base de datos del sistema. 
+                                    El archivo se descargará automáticamente una vez completado.
+                                </p>
+                                <form method="post" action="{% url 'create_backup' %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label>Descripción del respaldo (opcional)</label>
+                                        <input type="text" name="description" class="form-control" 
+                                               placeholder="Ej: Respaldo antes de actualización">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-download mr-2"></i>
+                                        Crear Respaldo
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="callout callout-info">
+                                    <h5><i class="fas fa-info-circle"></i> Información</h5>
+                                    <p><strong>El respaldo incluye toda la información del sistema:</strong></p>
+                                    <ul>
+                                        <li>Productos y categorías</li>
+                                        <li>Usuarios y permisos</li>
+                                        <li>Configuraciones del sistema</li>
+                                        <li>Historial de movimientos</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurar Backup -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-upload mr-2"></i>
+                            Restaurar Respaldo
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="callout callout-warning">
+                                    <h5><i class="fas fa-exclamation-triangle"></i> ¡Advertencia!</h5>
+                                    <p>Restaurar un respaldo reemplazará <strong>todos los datos actuales</strong> del sistema.</p>
+                                    <p class="mb-0"><strong>Esta acción no se puede deshacer.</strong></p>
+                                </div>
+                                <form method="post" action="{% url 'restore_backup' %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label>Seleccionar archivo de respaldo</label>
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input type="file" name="backup_file" class="custom-file-input" 
+                                                       id="backupFile" accept=".json" required>
+                                                <label class="custom-file-label" for="backupFile">
+                                                    Elegir archivo...
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">Solo archivos .json generados por este sistema</small>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="confirmRestore" required>
+                                        <label class="form-check-label" for="confirmRestore">
+                                            Confirmo que entiendo que esta acción reemplazará todos los datos actuales
+                                        </label>
+                                    </div>
+                                    <br>
+                                    <button type="submit" class="btn btn-warning btn-lg" 
+                                            onclick="return confirm('¿Está seguro de que desea restaurar este respaldo? Esta acción no se puede deshacer.')">
+                                        <i class="fas fa-upload mr-2"></i>
+                                        Restaurar Respaldo
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="callout callout-danger">
+                                    <h5><i class="fas fa-exclamation-triangle"></i> Precaución</h5>
+                                    <p><strong>Proceso Irreversible</strong></p>
+                                    <p class="mb-0">Asegúrese de tener un respaldo actual antes de proceder con la restauración.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Respaldos -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history mr-2"></i>
+                            Historial de Respaldos
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if backup_history %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha y Hora</th>
+                                        <th>Usuario</th>
+                                        <th>Descripción</th>
+                                        <th>Tamaño</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for backup in backup_history %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            {{ backup.fecha_creacion|date:"d/m/Y H:i" }}
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-user mr-1"></i>
+                                            {{ backup.creado_por }}
+                                        </td>
+                                        <td>{{ backup.descripcion|default:"Sin descripción" }}</td>
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ backup.tamaño_archivo|filesizeformat }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if backup.estado == 'completado' %}
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-check mr-1"></i>Completado
+                                                </span>
+                                            {% elif backup.estado == 'fallido' %}
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times mr-1"></i>Fallido
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-clock mr-1"></i>En proceso
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if backup.estado == 'completado' %}
+                                                <a href="{% url 'download_backup' backup.id %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-download"></i> Descargar
+                                                </a>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteBackup({{ backup.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-database fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No hay respaldos disponibles</h5>
+                            <p class="text-muted">Crea tu primer respaldo usando el formulario de arriba</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Modal de confirmación para eliminar backup -->
+<div class="modal fade" id="deleteBackupModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h4 class="modal-title text-white">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Confirmar Eliminación
+                </h4>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar este respaldo?</p>
+                <p class="text-muted">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'delete_backup' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="backup_id" id="deleteBackupId">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash mr-1"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script para el nombre del archivo
+$('.custom-file-input').on('change', function() {
+    let fileName = $(this).val().split('\\').pop();
+    $(this).next('.custom-file-label').addClass("selected").html(fileName);
+});
+
+// Función para eliminar backup
+function deleteBackup(backupId) {
+    $('#deleteBackupId').val(backupId);
+    $('#deleteBackupModal').modal('show');
+}
+
+// Mostrar mensajes de Django
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            toastr.error('{{ message }}');
+        {% elif message.tags == 'warning' %}
+            toastr.warning('{{ message }}');
+        {% elif message.tags == 'success' %}
+            toastr.success('{{ message }}');
+        {% elif message.tags == 'info' %}
+            toastr.info('{{ message }}');
+        {% else %}
+            toastr.info('{{ message }}');
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% if messages %}
+    {% for message in messages %}
+        toastr.{{ message.tags }}('{{ message }}');
+    {% endfor %}
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,248 @@
+{
+  "timestamp": "20250801_093512",
+  "created_by": "admin",
+  "description": "ejemplo2",
+  "data": {
+    "products.Producto": [
+      {
+        "model": "products.producto",
+        "pk": 9,
+        "fields": {
+          "nombre": "faca",
+          "descripcion": "2222",
+          "codigo": "2222",
+          "categoria": 4,
+          "precio_compra": "222.00",
+          "precio_venta": "2222.00",
+          "estado": true,
+          "stock_inicial": 222,
+          "imagen": "products/img/WhatsApp_Image_2025-03-18_at_10_8Zsm8yL.04.14_1a5cc9da.jpg"
+        }
+      }
+    ],
+    "categories.Categoria": [
+      {
+        "model": "categories.categoria",
+        "pk": 4,
+        "fields": {
+          "nombre": "coca"
+        }
+      },
+      {
+        "model": "categories.categoria",
+        "pk": 2,
+        "fields": {
+          "nombre": "cxs"
+        }
+      },
+      {
+        "model": "categories.categoria",
+        "pk": 3,
+        "fields": {
+          "nombre": "frutassdsdsds"
+        }
+      }
+    ],
+    "users.CustomUser": [
+      {
+        "model": "users.customuser",
+        "pk": 5,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$5dVRfyyhT8GXuWK7GTaSGd$lYwSER78j+NQ5GqEShtWr3YCYPczuxiTiUrecmEgkz8=",
+          "last_login": "2025-08-01T12:33:46.185Z",
+          "is_superuser": true,
+          "username": "admin",
+          "first_name": "",
+          "last_name": "",
+          "email": "admin@gmail.com",
+          "is_staff": true,
+          "is_active": true,
+          "date_joined": "2025-08-01T00:33:24.262Z",
+          "role": "admin",
+          "groups": [],
+          "user_permissions": []
+        }
+      },
+      {
+        "model": "users.customuser",
+        "pk": 6,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$D56H1DjZedMovUhQjgtvI9$cCtXEmBy43BD1gjAd3ZR+NSPgpdfQK5dOye1UJ3f2os=",
+          "last_login": null,
+          "is_superuser": false,
+          "username": "emple",
+          "first_name": "",
+          "last_name": "",
+          "email": "mvparmigiani@gmail.com",
+          "is_staff": false,
+          "is_active": true,
+          "date_joined": "2025-08-01T12:34:58.950Z",
+          "role": "employee",
+          "groups": [],
+          "user_permissions": []
+        }
+      }
+    ],
+    "event_calendar.Event": [
+      {
+        "model": "event_calendar.event",
+        "pk": 96,
+        "fields": {
+          "title": "ymh",
+          "start": null,
+          "color": "#0056b3"
+        }
+      },
+      {
+        "model": "event_calendar.event",
+        "pk": 97,
+        "fields": {
+          "title": "hooo",
+          "start": "2025-06-13T10:13:00Z",
+          "color": "#12e23c"
+        }
+      },
+      {
+        "model": "event_calendar.event",
+        "pk": 99,
+        "fields": {
+          "title": "oleeee",
+          "start": "2025-06-21T07:59:00Z",
+          "color": "#c41c1c"
+        }
+      },
+      {
+        "model": "event_calendar.event",
+        "pk": 103,
+        "fields": {
+          "title": "uuuuu",
+          "start": "2025-06-23T20:28:00Z",
+          "color": "#7a0b0b"
+        }
+      },
+      {
+        "model": "event_calendar.event",
+        "pk": 104,
+        "fields": {
+          "title": "hola",
+          "start": "2025-06-30T00:00:00Z",
+          "color": "#007bff"
+        }
+      }
+    ],
+    "customers.Cliente": [
+      {
+        "model": "customers.cliente",
+        "pk": 1,
+        "fields": {
+          "nombre": "Tadeo",
+          "dni_cuit": "",
+          "telefono": "444444",
+          "correo_electronico": "",
+          "direccion": ""
+        }
+      },
+      {
+        "model": "customers.cliente",
+        "pk": 2,
+        "fields": {
+          "nombre": "w",
+          "dni_cuit": "32323",
+          "telefono": "3232",
+          "correo_electronico": "Tasde@gmail.com",
+          "direccion": "32323232"
+        }
+      }
+    ],
+    "sales.Venta": [
+      {
+        "model": "sales.venta",
+        "pk": 1,
+        "fields": {
+          "fecha": "2025-07-24T01:15:41.248Z",
+          "cliente": 2,
+          "usuario": null,
+          "total": "68868.00",
+          "metodo_pago": "Transferencia"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 2,
+        "fields": {
+          "fecha": "2025-07-24T01:16:52.703Z",
+          "cliente": 1,
+          "usuario": null,
+          "total": "137736.00",
+          "metodo_pago": "Efectivo"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 3,
+        "fields": {
+          "fecha": "2025-07-24T20:50:45.549Z",
+          "cliente": 2,
+          "usuario": null,
+          "total": "35546.00",
+          "metodo_pago": "Efectivo"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 4,
+        "fields": {
+          "fecha": "2025-07-24T20:51:36.478Z",
+          "cliente": 1,
+          "usuario": null,
+          "total": "103302.00",
+          "metodo_pago": "Transferencia"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 5,
+        "fields": {
+          "fecha": "2025-07-24T20:55:56.856Z",
+          "cliente": 1,
+          "usuario": null,
+          "total": "103302.00",
+          "metodo_pago": "Efectivo"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 6,
+        "fields": {
+          "fecha": "2025-07-24T21:15:22.437Z",
+          "cliente": 1,
+          "usuario": null,
+          "total": "1112.00",
+          "metodo_pago": "Tarjeta"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 7,
+        "fields": {
+          "fecha": "2025-07-24T21:24:37.927Z",
+          "cliente": 2,
+          "usuario": null,
+          "total": "0.00",
+          "metodo_pago": "Efectivo"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 8,
+        "fields": {
+          "fecha": "2025-07-24T22:06:48.160Z",
+          "cliente": 1,
+          "usuario": null,
+          "total": "0.00",
+          "metodo_pago": "Efectivo"
+        }
+      }
+    ]
+  }
+}
