@@ -162,16 +162,14 @@ def create_report(request):
                 
                 print(f"Reporte completado. Tamaño: {report.tamaño_archivo} bytes")
                 
-                # Descargar archivo automáticamente
-                if os.path.exists(file_path):
-                    with open(file_path, 'rb') as f:
-                        content_type = 'application/pdf' if formato == 'pdf' else 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                        response = HttpResponse(f.read(), content_type=content_type)
-                        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                        messages.success(request, f'Reporte {report.get_tipo_display()} creado y descargado exitosamente')
-                        return response
-                else:
-                    messages.error(request, 'El archivo fue creado pero no se puede encontrar')
+                # CAMBIO PRINCIPAL: Agregar parámetro para indicar descarga automática
+                messages.success(request, f'Reporte {report.get_tipo_display()} creado exitosamente')
+                
+                # Redirigir al historial con parámetro para descarga automática
+                from django.urls import reverse
+                url = reverse('reportsList', kwargs={'tipo': tipo}) + f'?download={report.id}'
+                return redirect(url)
+                
             else:
                 report.estado = 'fallido'
                 report.save()
@@ -185,9 +183,12 @@ def create_report(request):
                 report.estado = 'fallido'
                 report.save()
             messages.error(request, f'Error al crear reporte: {str(e)}')
+            # Si no tenemos tipo, redirigir a una página por defecto
+            tipo = request.POST.get('tipo', 'ventas')  # Default a ventas si no hay tipo
             return redirect('reportsList', tipo=tipo)
     
-    return redirect('reportsList', tipo=tipo)
+    # Si es GET request, redirigir a reportes de ventas por defecto
+    return redirect('reportsList', tipo='ventas')
 
 def generate_sales_report(report, file_path, fecha_inicio, fecha_fin, formato):
     """Generar reporte de ventas"""

@@ -202,19 +202,159 @@
     </div>
 </div>
 
+<!-- Reemplaza el script actual en tu template por este: -->
 <script>
 function confirmDelete(reportId) {
     document.getElementById('reportIdToDelete').value = reportId;
     $('#deleteModal').modal('show');
 }
 
-// Establecer fecha máxima como hoy
+// Validación de fechas y configuración
 document.addEventListener('DOMContentLoaded', function() {
     var today = new Date().toISOString().split('T')[0];
-    var dateInputs = document.querySelectorAll('input[type="date"]');
-    for (var i = 0; i < dateInputs.length; i++) {
-        dateInputs[i].max = today;
+    var fechaInicio = document.querySelector('input[name="fecha_inicio"]');
+    var fechaFin = document.querySelector('input[name="fecha_fin"]');
+    var form = document.querySelector('form[method="post"]'); // Buscar el formulario POST
+    
+    // Verificar que los elementos existen
+    if (!fechaInicio || !fechaFin || !form) {
+        return;
+    }
+    
+    // Establecer fecha máxima como hoy
+    fechaInicio.max = today;
+    fechaFin.max = today;
+    
+    // Función para validar fechas
+    function validarFechas() {
+        if (fechaInicio.value && fechaFin.value) {
+            var inicio = new Date(fechaInicio.value);
+            var fin = new Date(fechaFin.value);
+            
+            if (inicio > fin) {
+                // Mostrar error
+                fechaInicio.setCustomValidity('La fecha de inicio no puede ser mayor que la fecha de fin');
+                fechaFin.setCustomValidity('La fecha de fin no puede ser menor que la fecha de inicio');
+                
+                // Agregar clases de error visual
+                fechaInicio.classList.add('is-invalid');
+                fechaFin.classList.add('is-invalid');
+                
+                // Mostrar mensaje de error
+                mostrarMensajeError('La fecha de inicio no puede ser mayor que la fecha de fin');
+                
+                return false;
+            } else {
+                // Limpiar errores
+                fechaInicio.setCustomValidity('');
+                fechaFin.setCustomValidity('');
+                
+                fechaInicio.classList.remove('is-invalid');
+                fechaFin.classList.remove('is-invalid');
+                
+                ocultarMensajeError();
+                
+                return true;
+            }
+        }
+        return true;
+    }
+    
+    // Función para mostrar mensaje de error
+    function mostrarMensajeError(mensaje) {
+        // Remover mensaje anterior si existe
+        ocultarMensajeError();
+        
+        // Crear nuevo mensaje de error
+        var errorDiv = document.createElement('div');
+        errorDiv.id = 'fecha-error-message';
+        errorDiv.className = 'alert alert-danger mt-2';
+        errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>' + mensaje;
+        
+        // Insertar después del formulario de fechas
+        var rowFechas = fechaInicio.closest('.row');
+        if (rowFechas && rowFechas.parentNode) {
+            rowFechas.parentNode.insertBefore(errorDiv, rowFechas.nextSibling);
+        }
+    }
+    
+    // Función para ocultar mensaje de error
+    function ocultarMensajeError() {
+        var errorMessage = document.getElementById('fecha-error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+    
+    // Eventos para validar en tiempo real
+    fechaInicio.addEventListener('change', function() {
+        validarFechas();
+        
+        // Si se selecciona fecha inicio, establecer como mínimo en fecha fin
+        if (this.value) {
+            fechaFin.min = this.value;
+        }
+    });
+    
+    fechaFin.addEventListener('change', function() {
+        validarFechas();
+        
+        // Si se selecciona fecha fin, establecer como máximo en fecha inicio
+        if (this.value) {
+            fechaInicio.max = this.value;
+        } else {
+            fechaInicio.max = today;
+        }
+    });
+    
+    // Validar antes de enviar el formulario
+    form.addEventListener('submit', function(e) {
+        if (!validarFechas()) {
+            e.preventDefault();
+            
+            // Mostrar toast de error si AdminLTE está disponible
+            if (typeof toastr !== 'undefined') {
+                toastr.error('Por favor corrige los errores en las fechas antes de continuar');
+            } else {
+                alert('Por favor corrige los errores en las fechas antes de continuar');
+            }
+            
+            return false;
+        }
+    });
+    
+    // Mejorar UX: Cuando se selecciona fecha inicio, enfocar fecha fin
+    fechaInicio.addEventListener('change', function() {
+        if (this.value && !fechaFin.value) {
+            setTimeout(() => fechaFin.focus(), 100);
+        }
+    });
+});
+
+// Validación adicional para el formato
+document.addEventListener('DOMContentLoaded', function() {
+    var formatoSelect = document.querySelector('select[name="formato"]');
+    var submitBtn = document.querySelector('button[type="submit"]');
+    
+    if (formatoSelect && submitBtn) {
+        formatoSelect.addEventListener('change', function() {
+            if (this.value) {
+                submitBtn.innerHTML = '<i class="fas fa-file-download mr-2"></i>Generar ' + 
+                    (this.value === 'pdf' ? 'PDF' : 'Excel') + ' y Descargar';
+            } else {
+                submitBtn.innerHTML = '<i class="fas fa-file-download mr-2"></i>Generar y Descargar';
+            }
+        });
     }
 });
+
+// Función auxiliar para formatear fechas (opcional)
+function formatearFecha(fecha) {
+    var d = new Date(fecha);
+    var day = ('0' + d.getDate()).slice(-2);
+    var month = ('0' + (d.getMonth() + 1)).slice(-2);
+    var year = d.getFullYear();
+    return day + '/' + month + '/' + year;
+}
 </script>
 {% endblock %}
