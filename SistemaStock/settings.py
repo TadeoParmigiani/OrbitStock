@@ -137,18 +137,21 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuración diferente para desarrollo vs producción
-if DEBUG:
-    STATICFILES_DIRS = [
-        BASE_DIR / "static",
-    ]
-else:
-    # Configuración para producción
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Siempre incluir STATICFILES_DIRS para que Django encuentre los archivos
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
-# Configuración adicional para WhiteNoise
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
+# Configuración de WhiteNoise para producción
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Configuración adicional para WhiteNoise en producción
+    WHITENOISE_USE_FINDERS = False  # False en producción para mejor performance
+    WHITENOISE_AUTOREFRESH = False  # False en producción
+else:
+    # Configuración para desarrollo
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_AUTOREFRESH = True
 
 # Media files
 MEDIA_URL = '/media/'
