@@ -124,7 +124,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <a href="/home/list" class="brand-link">
       {% if not debug %}
-        <img src="https://via.placeholder.com/60x60/007bff/ffffff?text=SO" alt="StockOrbit Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <img src="{% static 'dist/img/orbit.png' %}" alt="StockOrbit Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       {% else %}
         <img src="{% static 'dist/img/orbit.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       {% endif %}
