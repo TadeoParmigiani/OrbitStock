@@ -18,6 +18,7 @@
         </div>
     </div>
 </div>
+
 <!-- Contenido principal -->
 <section class="content">
     <div class="container-fluid">
@@ -25,7 +26,12 @@
         <div class="row">
             <div class="col-12">
                 {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -38,7 +44,7 @@
                     <div class="card-header">
                         <h3 class="card-title">Usuarios</h3>
                         <div class="card-tools">
-                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addUserModal">
+                            <button type="button" class="btn btn-primary" id="btnNuevoUsuario">
                                 <i class="fas fa-plus"></i> Nuevo Usuario
                             </button>
                         </div>
@@ -52,7 +58,7 @@
                                     <th>ID</th>
                                     <th>Nombre de Usuario</th>
                                     <th>Email</th>
-                                    <th>Rol</th> <!-- Columna de rol -->
+                                    <th>Rol</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -62,28 +68,24 @@
                                     <td>{{ user.id }}</td>
                                     <td>{{ user.username }}</td>
                                     <td>{{ user.email }}</td>
-                                    <td>{{ user.get_role_display }}</td> <!-- Mostrar rol -->
+                                    <td>{{ user.get_role_display }}</td>
                                     <td>
                                        <!-- Botón editar -->
-                                        <button class="btn btn-warning btn-sm edit-user-btn" 
-                                        data-id="{{ user.id }}" 
-                                        data-username="{{ user.username }}" 
-                                        data-email="{{ user.email }}" 
-                                        data-role="{{ user.role }}" 
-                                        data-toggle="modal" 
-                                        data-target="#editUserModal">
-                                        <i class="fas fa-edit"></i> Editar
+                                        <button type="button" class="btn btn-warning btn-sm edit-user-btn"
+                                                data-id="{{ user.id }}"
+                                                data-username="{{ user.username }}"
+                                                data-email="{{ user.email }}"
+                                                data-role="{{ user.role }}">
+                                            <i class="fas fa-edit"></i> Editar
                                         </button>
 
                                         <!-- Botón eliminar -->
-                                        <form method="POST" action="{% url 'userDelete' %}" class="d-inline">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="id" value="{{ user.id }}">
-                                            <button type="submit" class="btn btn-danger btn-sm" 
-                                                    {% if users|length == 1 %}disabled{% endif %}>
-                                                <i class="fas fa-trash-alt"></i> Eliminar
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm delete-user-btn"
+                                                data-id="{{ user.id }}"
+                                                data-username="{{ user.username }}"
+                                                {% if users|length == 1 %}disabled{% endif %}>
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </button>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -98,34 +100,36 @@
 </section>
 
 <!-- Modal Agregar Usuario -->
-<div class="modal fade" id="addUserModal">
-    <div class="modal-dialog">
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form class="needs-validation" novalidate method="POST" action="{% url 'userCreate' %}">
+            <form id="formAgregarUsuario" method="POST" action="{% url 'userCreate' %}">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title">Agregar Usuario</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Usuario</label>
-                        <input type="text" name="username" class="form-control" required minlength="3">
+                        <label for="username">Usuario</label>
+                        <input type="text" id="username" name="username" class="form-control" required minlength="3">
                         <div class="invalid-feedback">Ingrese un nombre de usuario (mínimo 3 caracteres).</div>
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" required>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
                         <div class="invalid-feedback">Ingrese un email válido.</div>
                     </div>
                     <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" name="password" class="form-control" required minlength="6">
+                        <label for="password">Contraseña</label>
+                        <input type="password" id="password" name="password" class="form-control" required minlength="6">
                         <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
                     </div>
                     <div class="form-group">
-                        <label>Rol</label>
-                        <select name="role" class="form-control" required>
+                        <label for="role">Rol</label>
+                        <select id="role" name="role" class="form-control" required>
                             <option value="">Seleccione un rol</option>
                             <option value="admin">Admin</option>
                             <option value="employee">Empleado</option>
@@ -143,35 +147,37 @@
 </div>
 
 <!-- Modal Editar Usuario -->
-<div class="modal fade" id="editUserModal">
-    <div class="modal-dialog">
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form class="needs-validation" novalidate method="POST" action="{% url 'userUpdate' %}">
+            <form id="formEditarUsuario" method="POST" action="{% url 'userUpdate' %}">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Usuario</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="edit-user-id" name="id">
                     <div class="form-group">
-                        <label>Usuario</label>
+                        <label for="edit-username">Usuario</label>
                         <input type="text" id="edit-username" name="username" class="form-control" required minlength="3">
                         <div class="invalid-feedback">Ingrese un nombre de usuario (mínimo 3 caracteres).</div>
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
+                        <label for="edit-email">Email</label>
                         <input type="email" id="edit-email" name="email" class="form-control" required>
                         <div class="invalid-feedback">Ingrese un email válido.</div>
                     </div>
                     <div class="form-group">
-                        <label>Nueva Contraseña (opcional)</label>
+                        <label for="edit-password">Nueva Contraseña (opcional)</label>
                         <input type="password" id="edit-password" name="password" class="form-control" minlength="6">
                         <div class="invalid-feedback">Si ingresa una contraseña, debe tener al menos 6 caracteres.</div>
                     </div>
                     <div class="form-group">
-                        <label>Rol</label>
-                        <select name="role" id="edit-role" class="form-control" required>
+                        <label for="edit-role">Rol</label>
+                        <select id="edit-role" name="role" class="form-control" required>
                             <option value="">Seleccione un rol</option>
                             <option value="admin">Admin</option>
                             <option value="employee">Empleado</option>
@@ -188,50 +194,150 @@
     </div>
 </div>
 
+<!-- Modal Confirmar Eliminación -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formEliminarUsuario" method="POST" action="{% url 'userDelete' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="delete-user-id" name="id">
+                    <p>¿Está seguro que desea eliminar el usuario <strong id="delete-user-username"></strong>?</p>
+                    <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-    (function () {
-        'use strict';
-        window.addEventListener('load', function () {
-            const forms = document.getElementsByClassName('needs-validation');
-            Array.prototype.forEach.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
-                    const password = form.querySelector('[name="password"]');
-                    if (password && password.value.length > 0 && password.value.length < 6) {
-                        password.setCustomValidity("La contraseña debe tener al menos 6 caracteres.");
-                    } else {
-                        password.setCustomValidity("");
-                    }
+// Esperar a que jQuery esté disponible
+function waitForJQuery() {
+    if (typeof $ !== 'undefined') {
+        initUsuarios();
+    } else {
+        setTimeout(waitForJQuery, 100);
+    }
+}
 
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-    })();
-</script>
-
-
-<script>
-   
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll('.edit-user-btn').forEach(function(button) {
-            button.addEventListener('click', function() {
-                var userId = this.getAttribute('data-id');
-                var username = this.getAttribute('data-username');
-                var email = this.getAttribute('data-email');
-                var role = this.getAttribute('data-role');
-
-                document.getElementById('edit-user-id').value = userId;
-                document.getElementById('edit-username').value = username;
-                document.getElementById('edit-email').value = email;
-                document.getElementById('edit-role').value = role;
-            });
-        });
+function initUsuarios() {
+    console.log('Script usuarios iniciado');
+    console.log('jQuery disponible:', typeof $ !== 'undefined');
+    console.log('Bootstrap modal disponible:', typeof $.fn.modal !== 'undefined');
+    
+    // Botón Nuevo Usuario
+    $('#btnNuevoUsuario').click(function() {
+        console.log('Click en Nuevo Usuario');
+        $('#formAgregarUsuario')[0].reset();
+        $('#formAgregarUsuario').removeClass('was-validated');
+        $('#addUserModal').modal('show');
     });
+
+    // Botones Editar
+    $('.edit-user-btn').click(function() {
+        console.log('Click en Editar Usuario');
+        var userId = $(this).data('id');
+        var username = $(this).data('username');
+        var email = $(this).data('email');
+        var role = $(this).data('role');
+        
+        $('#edit-user-id').val(userId);
+        $('#edit-username').val(username);
+        $('#edit-email').val(email);
+        $('#edit-role').val(role);
+        $('#edit-password').val(''); // Limpiar campo de contraseña
+        $('#formEditarUsuario').removeClass('was-validated');
+        $('#editUserModal').modal('show');
+    });
+
+    // Botones Eliminar
+    $('.delete-user-btn').click(function() {
+        console.log('Click en Eliminar Usuario');
+        var userId = $(this).data('id');
+        var username = $(this).data('username');
+        
+        $('#delete-user-id').val(userId);
+        $('#delete-user-username').text(username);
+        $('#deleteUserModal').modal('show');
+    });
+
+    // Validación de formularios
+    $('form[id^="form"]').submit(function(e) {
+        var form = this;
+        console.log('Submit formulario:', form.id);
+        
+        // Validar campos requeridos
+        var isValid = true;
+        $(form).find('[required]').each(function() {
+            if (!this.value.trim()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // Validación especial para contraseña en edición (solo si no está vacía)
+        if (form.id === 'formEditarUsuario') {
+            var passwordField = $(form).find('#edit-password');
+            if (passwordField.val().length > 0 && passwordField.val().length < 6) {
+                passwordField.addClass('is-invalid');
+                isValid = false;
+            } else {
+                passwordField.removeClass('is-invalid');
+            }
+        }
+
+        // Validación de email
+        $(form).find('[type="email"]').each(function() {
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (this.value && !emailPattern.test(this.value)) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else if (this.value) {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            $(form).addClass('was-validated');
+            return false;
+        }
+        
+        // Si todo está bien, mostrar loading
+        var submitBtn = $(form).find('[type="submit"]');
+        var originalText = submitBtn.html();
+        submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
+        
+        // Restaurar botón después de 3 segundos (por si hay error)
+        setTimeout(function() {
+            submitBtn.html(originalText).prop('disabled', false);
+        }, 3000);
+    });
+
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(function() {
+        $('.alert').alert('close');
+    }, 5000);
+}
+
+// Iniciar cuando la página esté lista
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', waitForJQuery);
+} else {
+    waitForJQuery();
+}
 </script>
 
 {% endblock %}
