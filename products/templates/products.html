@@ -1,6 +1,8 @@
 {% extends 'index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Encabezado de contenido -->
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -16,29 +18,39 @@
         </div>
     </div>
 </div>
+
+<!-- Contenido principal -->
 <section class="content">
     <div class="container-fluid">
         {% if messages %}
         <div class="row">
             <div class="col-12">
                 {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
 
+        <!-- Listado de Productos -->
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Productos</h3>
                         <div class="card-tools">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#addProductoModal">
+                            <button type="button" class="btn btn-primary" id="btnNuevoProducto">
                                 <i class="fas fa-plus"></i> Nuevo Producto
                             </button>
                         </div>
                     </div>
+                    <!-- /.card-header -->
+
                     <div class="card-body">
                         <table id="mi-tabla" class="table table-bordered table-striped">
                             <thead>
@@ -72,97 +84,109 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <button 
-                                            class="btn btn-warning btn-sm editar-producto-btn"
-                                            data-id="{{ producto.id }}"
-                                            data-nombre="{{ producto.nombre }}"
-                                            data-codigo="{{ producto.codigo }}"
-                                            data-descripcion="{{ producto.descripcion }}"
-                                            data-categoria="{{ producto.categoria.id }}"
-                                            data-precio_compra="{{ producto.precio_compra }}"
-                                            data-precio_venta="{{ producto.precio_venta }}"
-                                            data-stock="{{ producto.stock_inicial }}"
-                                            data-estado="{{ producto.estado }}"
-                                            data-imagen-url="{% if producto.imagen %}{{ producto.imagen.url }}{% endif %}"
-                                        >
-                                            <i class="fas fa-edit"></i>
+                                        <!-- Botón editar -->
+                                        <button type="button" class="btn btn-warning btn-sm edit-producto-btn"
+                                                data-id="{{ producto.id }}"
+                                                data-nombre="{{ producto.nombre }}"
+                                                data-codigo="{{ producto.codigo }}"
+                                                data-descripcion="{{ producto.descripcion }}"
+                                                data-categoria="{{ producto.categoria.id }}"
+                                                data-precio_compra="{{ producto.precio_compra }}"
+                                                data-precio_venta="{{ producto.precio_venta }}"
+                                                data-stock="{{ producto.stock_inicial }}"
+                                                data-estado="{{ producto.estado }}"
+                                                data-imagen-url="{% if producto.imagen %}{{ producto.imagen.url }}{% endif %}">
+                                            <i class="fas fa-edit"></i> Editar
                                         </button>
-                                        <form method="POST" action="{% url 'productDelete' producto.id %}" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
+
+                                        <!-- Botón eliminar -->
+                                        <button type="button" class="btn btn-danger btn-sm delete-producto-btn"
+                                                data-id="{{ producto.id }}"
+                                                data-nombre="{{ producto.nombre }}">
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </button>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                    <!-- /.card-body -->
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Modal Agregar/Editar Producto -->
-<div class="modal fade" id="addProductoModal">
-    <div class="modal-dialog modal-lg">
+<!-- Modal Agregar Producto -->
+<div class="modal fade" id="addProductoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form id="formAgregarProducto" method="POST" enctype="multipart/form-data" action="{% url 'productCreate' %}" class="needs-validation" novalidate>
+            <form id="formAgregarProducto" method="POST" enctype="multipart/form-data" action="{% url 'productCreate' %}">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title">Agregar Producto</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="producto_id" id="productoId">
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label>Nombre</label>
-                            <input type="text" name="nombre" id="nombreInput" class="form-control" required>
+                            <label for="nombre">Nombre</label>
+                            <input type="text" id="nombre" name="nombre" class="form-control" required minlength="2">
+                            <div class="invalid-feedback">Ingrese un nombre válido (mínimo 2 caracteres).</div>
                         </div>
                         <div class="form-group col-md-6">
-                            <label>Código</label>
-                            <input type="text" name="codigo" id="codigoInput" class="form-control" required>
+                            <label for="codigo">Código</label>
+                            <input type="text" id="codigo" name="codigo" class="form-control" required minlength="2">
+                            <div class="invalid-feedback">Ingrese un código válido (mínimo 2 caracteres).</div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea name="descripcion" id="descripcionInput" class="form-control" rows="3" required></textarea>
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control" rows="3" required minlength="5"></textarea>
+                        <div class="invalid-feedback">Ingrese una descripción válida (mínimo 5 caracteres).</div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label>Categoría</label>
-                            <select name="categoria" id="categoriaSelect" class="form-control" required>
-                                <option value="" disabled selected>Seleccione una categoría</option>
+                            <label for="categoria">Categoría</label>
+                            <select id="categoria" name="categoria" class="form-control" required>
+                                <option value="">Seleccione una categoría</option>
                                 {% for categoria in categorias %}
                                     <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
                                 {% endfor %}
                             </select>
+                            <div class="invalid-feedback">Seleccione una categoría.</div>
                         </div>
                         <div class="form-group col-md-3">
-                            <label>Precio Compra</label>
-                            <input type="number" name="precio_compra" id="precioCompraInput" class="form-control" required min="0" step="0.01">
+                            <label for="precio_compra">Precio Compra</label>
+                            <input type="number" id="precio_compra" name="precio_compra" class="form-control" required min="0" step="0.01">
+                            <div class="invalid-feedback">Ingrese un precio de compra válido.</div>
                         </div>
                         <div class="form-group col-md-3">
-                            <label>Precio Venta</label>
-                            <input type="number" name="precio_venta" id="precioVentaInput" class="form-control" required min="0" step="0.01">
+                            <label for="precio_venta">Precio Venta</label>
+                            <input type="number" id="precio_venta" name="precio_venta" class="form-control" required min="0" step="0.01">
+                            <div class="invalid-feedback">Ingrese un precio de venta válido.</div>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-4">
-                            <label>Stock Inicial</label>
-                            <input type="number" name="stock_inicial" id="stockInput" class="form-control" required min="0">
+                            <label for="stock_inicial">Stock Inicial</label>
+                            <input type="number" id="stock_inicial" name="stock_inicial" class="form-control" required min="0">
+                            <div class="invalid-feedback">Ingrese un stock válido.</div>
                         </div>
                         <div class="form-group col-md-4">
                             <label>Estado</label><br>
-                            <input type="checkbox" name="estado" id="estadoCheckbox" checked> Activo
+                            <div class="form-check">
+                                <input type="checkbox" id="estado" name="estado" class="form-check-input" checked>
+                                <label class="form-check-label" for="estado">Activo</label>
+                            </div>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Imagen</label>
-                            <input type="file" name="imagen" class="form-control-file" id="imagenInput" accept="image/*">
-                            <img id="previewImagen" src="#" alt="Previsualización" class="img-thumbnail mt-2 d-none" style="max-height: 100px;">
+                            <label for="imagen">Imagen</label>
+                            <input type="file" id="imagen" name="imagen" class="form-control-file" accept="image/*">
+                            <img id="preview-imagen" src="#" alt="Previsualización" class="img-thumbnail mt-2 d-none" style="max-height: 100px;">
                         </div>
                     </div>
                 </div>
@@ -175,90 +199,282 @@
     </div>
 </div>
 
+<!-- Modal Editar Producto -->
+<div class="modal fade" id="editProductoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form id="formEditarProducto" method="POST" enctype="multipart/form-data" action="">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Producto</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-producto-id" name="id">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="edit-nombre">Nombre</label>
+                            <input type="text" id="edit-nombre" name="nombre" class="form-control" required minlength="2">
+                            <div class="invalid-feedback">Ingrese un nombre válido (mínimo 2 caracteres).</div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="edit-codigo">Código</label>
+                            <input type="text" id="edit-codigo" name="codigo" class="form-control" required minlength="2">
+                            <div class="invalid-feedback">Ingrese un código válido (mínimo 2 caracteres).</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-descripcion">Descripción</label>
+                        <textarea id="edit-descripcion" name="descripcion" class="form-control" rows="3" required minlength="5"></textarea>
+                        <div class="invalid-feedback">Ingrese una descripción válida (mínimo 5 caracteres).</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="edit-categoria">Categoría</label>
+                            <select id="edit-categoria" name="categoria" class="form-control" required>
+                                <option value="">Seleccione una categoría</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Seleccione una categoría.</div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="edit-precio_compra">Precio Compra</label>
+                            <input type="number" id="edit-precio_compra" name="precio_compra" class="form-control" required min="0" step="0.01">
+                            <div class="invalid-feedback">Ingrese un precio de compra válido.</div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="edit-precio_venta">Precio Venta</label>
+                            <input type="number" id="edit-precio_venta" name="precio_venta" class="form-control" required min="0" step="0.01">
+                            <div class="invalid-feedback">Ingrese un precio de venta válido.</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="edit-stock_inicial">Stock Inicial</label>
+                            <input type="number" id="edit-stock_inicial" name="stock_inicial" class="form-control" required min="0">
+                            <div class="invalid-feedback">Ingrese un stock válido.</div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Estado</label><br>
+                            <div class="form-check">
+                                <input type="checkbox" id="edit-estado" name="estado" class="form-check-input">
+                                <label class="form-check-label" for="edit-estado">Activo</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-imagen">Imagen (opcional)</label>
+                            <input type="file" id="edit-imagen" name="imagen" class="form-control-file" accept="image/*">
+                            <img id="edit-preview-imagen" src="#" alt="Imagen actual" class="img-thumbnail mt-2 d-none" style="max-height: 100px;">
+                            <small class="form-text text-muted">Dejar vacío para mantener la imagen actual</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div class="modal fade" id="deleteProductoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formEliminarProducto" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="delete-producto-id" name="id">
+                    <p>¿Está seguro que desea eliminar el producto <strong id="delete-producto-nombre"></strong>?</p>
+                    <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("formAgregarProducto");
-    const imagenInput = document.getElementById("imagenInput");
-    const preview = document.getElementById("previewImagen");
+// Esperar a que jQuery esté disponible
+function waitForJQuery() {
+    if (typeof $ !== 'undefined') {
+        initProductos();
+    } else {
+        setTimeout(waitForJQuery, 100);
+    }
+}
 
-    // Previsualización de imagen
-    imagenInput.addEventListener("change", function () {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-                preview.classList.remove("d-none");
-            };
-            reader.readAsDataURL(file);
+function initProductos() {
+    console.log('Script productos iniciado');
+    console.log('jQuery disponible:', typeof $ !== 'undefined');
+    console.log('Bootstrap modal disponible:', typeof $.fn.modal !== 'undefined');
+    
+    // Botón Nuevo Producto
+    $('#btnNuevoProducto').click(function() {
+        console.log('Click en Nuevo Producto');
+        $('#formAgregarProducto')[0].reset();
+        $('#formAgregarProducto').removeClass('was-validated');
+        $('#preview-imagen').addClass('d-none').attr('src', '#');
+        $('#addProductoModal').modal('show');
+    });
+
+    // Botones Editar
+    $('.edit-producto-btn').click(function() {
+        console.log('Click en Editar Producto');
+        var data = $(this).data();
+        
+        // Actualizar la acción del formulario con el ID del producto
+        $('#formEditarProducto').attr('action', '/products/update/' + data.id + '/');
+        
+        $('#edit-producto-id').val(data.id);
+        $('#edit-nombre').val(data.nombre);
+        $('#edit-codigo').val(data.codigo);
+        $('#edit-descripcion').val(data.descripcion);
+        $('#edit-categoria').val(data.categoria);
+        $('#edit-precio_compra').val(data.precio_compra ? data.precio_compra.toString().replace(',', '.') : '');
+        $('#edit-precio_venta').val(data.precio_venta ? data.precio_venta.toString().replace(',', '.') : '');
+        $('#edit-stock_inicial').val(data.stock);
+        $('#edit-estado').prop('checked', data.estado === 'True' || data.estado === true);
+        
+        // Manejar imagen actual
+        if (data.imagenUrl) {
+            $('#edit-preview-imagen').removeClass('d-none').attr('src', data.imagenUrl);
         } else {
-            preview.src = "#";
-            preview.classList.add("d-none");
+            $('#edit-preview-imagen').addClass('d-none').attr('src', '#');
         }
+        
+        $('#formEditarProducto').removeClass('was-validated');
+        $('#editProductoModal').modal('show');
     });
 
-    // Rellenar formulario al hacer clic en editar
-    document.querySelectorAll(".editar-producto-btn").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const modal = $('#addProductoModal');
-            form.setAttribute("action", `/products/update/${this.dataset.id}/`);
+    // Botones Eliminar
+    $('.delete-producto-btn').click(function() {
+        console.log('Click en Eliminar Producto');
+        var id = $(this).data('id');
+        var nombre = $(this).data('nombre');
+        
+        // Actualizar la acción del formulario con el ID del producto
+        $('#formEliminarProducto').attr('action', '/products/delete/' + id + '/');
+        
+        $('#delete-producto-id').val(id);
+        $('#delete-producto-nombre').text(nombre);
+        $('#deleteProductoModal').modal('show');
+    });
 
-            document.getElementById("productoId").value = this.dataset.id;
-            document.getElementById("nombreInput").value = this.dataset.nombre;
-            document.getElementById("codigoInput").value = this.dataset.codigo;
-            document.getElementById("descripcionInput").value = this.dataset.descripcion;
-            document.getElementById("categoriaSelect").value = this.dataset.categoria;
-            document.getElementById("precioCompraInput").value = this.dataset.precio_compra;
-            document.getElementById("precioVentaInput").value = this.dataset.precio_venta;
-            document.getElementById("stockInput").value = this.dataset.stock;
-            document.getElementById("estadoCheckbox").checked = this.dataset.estado === "True";
+    // Preview de imagen para agregar
+    $('#imagen').change(function() {
+        previewImage(this, '#preview-imagen');
+    });
 
-            if (this.dataset.imagenUrl) {
-                preview.src = this.dataset.imagenUrl;
-                preview.classList.remove("d-none");
+    // Preview de imagen para editar
+    $('#edit-imagen').change(function() {
+        previewImage(this, '#edit-preview-imagen');
+    });
+
+    // Función para previsualizar imagen
+    function previewImage(input, previewSelector) {
+        var preview = $(previewSelector);
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.attr('src', e.target.result).removeClass('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.attr('src', '#').addClass('d-none');
+        }
+    }
+
+    // Validación de formularios
+    $('form[id^="form"]').submit(function(e) {
+        var form = this;
+        console.log('Submit formulario:', form.id);
+        
+        // Validar campos requeridos
+        var isValid = true;
+        $(form).find('[required]').each(function() {
+            var value = this.type === 'checkbox' ? this.checked : this.value.trim();
+            if (!value) {
+                isValid = false;
+                $(this).addClass('is-invalid');
             } else {
-                preview.src = "#";
-                preview.classList.add("d-none");
+                $(this).removeClass('is-invalid');
             }
-
-            modal.modal('show');
         });
-    });
 
-    // Envío del formulario por fetch
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
+        // Validación especial para números
+        $(form).find('input[type="number"]').each(function() {
+            if (this.value && (parseFloat(this.value) < 0)) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else if (this.value) {
+                $(this).removeClass('is-invalid');
+            }
+        });
 
-        form.classList.add("was-validated");
-        if (!form.checkValidity()) {
-            return;
+        // Validación para precio de venta > precio de compra
+        if (form.id === 'formAgregarProducto' || form.id === 'formEditarProducto') {
+            var precioCompra = parseFloat($(form).find('[name="precio_compra"]').val()) || 0;
+            var precioVenta = parseFloat($(form).find('[name="precio_venta"]').val()) || 0;
+            
+            if (precioVenta <= precioCompra) {
+                $(form).find('[name="precio_venta"]').addClass('is-invalid');
+                $(form).find('[name="precio_venta"]').siblings('.invalid-feedback').text('El precio de venta debe ser mayor al precio de compra.');
+                isValid = false;
+            }
         }
 
-        const url = form.getAttribute("action");
-        const formData = new FormData(form);
-
-        fetch(url, {
-            method: "POST",
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value
-            },
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("Error en el servidor.");
-            return response.text();
-        })
-        .then(data => {
-            $('#addProductoModal').modal('hide');
-            alert("Producto guardado correctamente.");
-            window.location.reload();
-        })
-        .catch(error => {
-            console.error(error);
-            alert("Hubo un error al guardar el producto.");
-        });
+        if (!isValid) {
+            e.preventDefault();
+            $(form).addClass('was-validated');
+            return false;
+        }
+        
+        // Si todo está bien, mostrar loading
+        var submitBtn = $(form).find('[type="submit"]');
+        var originalText = submitBtn.html();
+        submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
+        
+        // Para formularios con archivo, permitir que se envíe normalmente
+        if (form.id === 'formEliminarProducto') {
+            // Solo el formulario de eliminar usa envío normal
+            return true;
+        } else {
+            // Los formularios de crear/editar pueden usar AJAX o envío normal
+            // Restaurar botón después de 3 segundos (por si hay error)
+            setTimeout(function() {
+                submitBtn.html(originalText).prop('disabled', false);
+            }, 3000);
+            return true; // Permitir envío normal del formulario
+        }
     });
-});
+
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(function() {
+        $('.alert').alert('close');
+    }, 5000);
+}
+
+// Iniciar cuando la página esté lista
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', waitForJQuery);
+} else {
+    waitForJQuery();
+}
 </script>
+
 {% endblock %}

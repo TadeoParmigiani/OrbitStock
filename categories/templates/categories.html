@@ -248,7 +248,7 @@ function initCategorias() {
         var originalText = submitBtn.html();
         submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
         
-        // Restaurar botón después de 3 segundos (por si hay error)
+        // Restaurar botón después de 3 segundos
         setTimeout(function() {
             submitBtn.html(originalText).prop('disabled', false);
         }, 3000);

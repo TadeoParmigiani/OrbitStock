@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Cliente
 
-# LISTAR CLIENTES
+
 def clientList(request):
     clientes = Cliente.objects.all()
     return render(request, 'customers.html', {'clientes': clientes})
 
 
-# CREAR CLIENTE
+
 def clientCreate(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -32,7 +32,7 @@ def clientCreate(request):
     return redirect('clientList')
 
 
-# EDITAR CLIENTE
+
 def clientUpdate(request):
     if request.method == 'POST':
         cliente_id = request.POST.get('id')
@@ -50,7 +50,6 @@ def clientUpdate(request):
     return redirect('clientList')
 
 
-# ELIMINAR CLIENTE
 def clientDelete(request):
     if request.method == 'POST':
         cliente_id = request.POST.get('id')

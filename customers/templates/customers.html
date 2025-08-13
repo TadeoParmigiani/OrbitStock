@@ -196,7 +196,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     console.log('Script clientes iniciado');
 
-    // Función para mostrar modales manualmente (fallback si Bootstrap no funciona)
+    // Función para mostrar modales manualmente 
     function showModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -359,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
                 submitBtn.disabled = true;
                 
-                // Restaurar botón después de 3 segundos (por si hay error)
+                // Restaurar botón después de 3 segundos 
                 setTimeout(function() {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
