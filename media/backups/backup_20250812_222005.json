@@ -1,0 +1,135 @@
+{
+  "timestamp": "20250812_222005",
+  "created_by": "admin",
+  "description": "respaldo 1",
+  "data": {
+    "users.CustomUser": [
+      {
+        "model": "users.customuser",
+        "pk": 1,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$h7amWAzdv3J6dn94iKCvIH$eFRk6UrFrOnXfQUQL1VoY8Bw8nfFcKjfDNGYzCinqpI=",
+          "last_login": "2025-08-13T00:41:35.429Z",
+          "is_superuser": true,
+          "username": "admin",
+          "first_name": "",
+          "last_name": "",
+          "email": "admin@gmail.com",
+          "is_staff": true,
+          "is_active": true,
+          "date_joined": "2025-08-08T02:31:45.739Z",
+          "role": "admin",
+          "groups": [],
+          "user_permissions": []
+        }
+      },
+      {
+        "model": "users.customuser",
+        "pk": 2,
+        "fields": {
+          "password": "pbkdf2_sha256$1000000$AMNM6WDPMJhVGYDsWyPGS5$XKXCPXFRLL15DnFcfZ5hHcUrx+ia82VaC1b3HoiHzXU=",
+          "last_login": null,
+          "is_superuser": false,
+          "username": "juanchi",
+          "first_name": "",
+          "last_name": "",
+          "email": "juanchi2001@gmail.com",
+          "is_staff": false,
+          "is_active": true,
+          "date_joined": "2025-08-10T23:08:21.726Z",
+          "role": "admin",
+          "groups": [],
+          "user_permissions": []
+        }
+      }
+    ],
+    "categories.Categoria": [
+      {
+        "model": "categories.categoria",
+        "pk": 1,
+        "fields": {
+          "nombre": "bebidas"
+        }
+      },
+      {
+        "model": "categories.categoria",
+        "pk": 3,
+        "fields": {
+          "nombre": "Cereales"
+        }
+      },
+      {
+        "model": "categories.categoria",
+        "pk": 2,
+        "fields": {
+          "nombre": "galletitas"
+        }
+      }
+    ],
+    "customers.Cliente": [
+      {
+        "model": "customers.cliente",
+        "pk": 1,
+        "fields": {
+          "nombre": "Anibal Gonzales",
+          "dni_cuit": "33333",
+          "telefono": "03451234",
+          "correo_electronico": "",
+          "direccion": ""
+        }
+      }
+    ],
+    "products.Producto": [
+      {
+        "model": "products.producto",
+        "pk": 1,
+        "fields": {
+          "nombre": "Arroz ",
+          "descripcion": "Arroz yamani",
+          "codigo": "001",
+          "categoria": 3,
+          "precio_compra": "100.00",
+          "precio_venta": "260.00",
+          "estado": true,
+          "stock_inicial": 31,
+          "imagen": "products/img/D_NQ_NP_749891-MLA75977545004_052024-O.webp"
+        }
+      }
+    ],
+    "event_calendar.Event": [
+      {
+        "model": "event_calendar.event",
+        "pk": 4,
+        "fields": {
+          "title": "repositor",
+          "start": "2025-07-28T15:25:00Z",
+          "color": "#007bff"
+        }
+      }
+    ],
+    "sales.Venta": [
+      {
+        "model": "sales.venta",
+        "pk": 1,
+        "fields": {
+          "fecha": "2025-08-12T20:33:37.331Z",
+          "cliente": 1,
+          "usuario": 1,
+          "total": "2600.00",
+          "metodo_pago": "Efectivo"
+        }
+      },
+      {
+        "model": "sales.venta",
+        "pk": 2,
+        "fields": {
+          "fecha": "2025-08-12T20:35:02.536Z",
+          "cliente": 1,
+          "usuario": 1,
+          "total": "1040.00",
+          "metodo_pago": "Efectivo"
+        }
+      }
+    ]
+  }
+}

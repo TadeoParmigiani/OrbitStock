@@ -221,7 +221,7 @@
 </div>
 
 <script>
-// Esperar a que jQuery esté disponible
+
 function waitForJQuery() {
     if (typeof $ !== 'undefined') {
         initUsuarios();
@@ -255,7 +255,7 @@ function initUsuarios() {
         $('#edit-username').val(username);
         $('#edit-email').val(email);
         $('#edit-role').val(role);
-        $('#edit-password').val(''); // Limpiar campo de contraseña
+        $('#edit-password').val(''); 
         $('#formEditarUsuario').removeClass('was-validated');
         $('#editUserModal').modal('show');
     });
@@ -287,7 +287,7 @@ function initUsuarios() {
             }
         });
 
-        // Validación especial para contraseña en edición (solo si no está vacía)
+        // Validación especial para contraseña en edición
         if (form.id === 'formEditarUsuario') {
             var passwordField = $(form).find('#edit-password');
             if (passwordField.val().length > 0 && passwordField.val().length < 6) {
@@ -320,7 +320,7 @@ function initUsuarios() {
         var originalText = submitBtn.html();
         submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
         
-        // Restaurar botón después de 3 segundos (por si hay error)
+        // Restaurar botón después de 3 segundos 
         setTimeout(function() {
             submitBtn.html(originalText).prop('disabled', false);
         }, 3000);

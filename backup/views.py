@@ -131,14 +131,13 @@ def restore_backup(request):
             print(f"🔍 Modelos encontrados: {list(backup_data['data'].keys())}")
             
             # Restaurar datos usando deserialización de Django
-            # ORDEN ESPECÍFICO para manejar dependencias
             restore_order = [
-                'users.CustomUser',           # Primero usuarios
-                'categories.Categoria',       # Luego categorías
-                'customers.Cliente',          # Luego clientes
-                'products.Producto',          # Luego productos (depende de categorías)
-                'event_calendar.Event',       # Luego eventos (depende de usuarios)
-                'sales.Venta',               # Por último ventas (depende de productos y clientes)
+                'users.CustomUser',           
+                'categories.Categoria',      
+                'customers.Cliente',         
+                'products.Producto',         
+                'event_calendar.Event',      
+                'sales.Venta',               
                 'Sales.DetalleVenta',
             ]
             
@@ -166,9 +165,9 @@ def restore_backup(request):
                     model.objects.all().delete()
                     print(f"🗑️ Datos existentes eliminados")
                     
-                    # MÉTODO MEJORADO: Deserialización con manejo de errores
-                    if model_data:  # Solo si hay datos
-                        # Convertir de vuelta a JSON string para deserializar
+                   
+                    if model_data:  
+                       
                         json_data = json.dumps(model_data)
                         
                         objects_restored = 0

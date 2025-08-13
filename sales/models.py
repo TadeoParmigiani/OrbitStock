@@ -1,6 +1,6 @@
 from django.db import models
 from products.models import Producto
-from customers.models import Cliente  # Cliente es otra app
+from customers.models import Cliente  
 from users.models import CustomUser
 
 

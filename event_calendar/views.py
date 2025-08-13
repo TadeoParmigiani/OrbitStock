@@ -6,12 +6,12 @@ from django.http import JsonResponse
 from .models import Event
 import json
 
-# Página del calendario
+
 @login_required(login_url='login')
 def eventList(request):
     return render(request, 'calendar.html')
 
-# Obtener eventos ya creados (para cargarlos en el calendario)
+
 @login_required(login_url='login')
 def eventos_calendario(request):
     eventos = Event.objects.filter(start__isnull=False)
@@ -23,7 +23,7 @@ def eventos_calendario(request):
     } for e in eventos]
     return JsonResponse(data, safe=False)
 
-# Crear nuevo evento
+
 @csrf_exempt
 @login_required(login_url='login')
 def eventCreate(request):
@@ -43,7 +43,6 @@ def eventCreate(request):
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
-# Eliminar evento
 @csrf_exempt
 @require_http_methods(["POST"])
 @login_required(login_url='login')

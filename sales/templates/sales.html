@@ -1,6 +1,8 @@
 {% extends 'index.html' %}
 {% load static %}
+
 {% block content %}
+<!-- Encabezado de contenido -->
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -16,17 +18,24 @@
         </div>
     </div>
 </div>
+
+<!-- Contenido principal -->
 <section class="content">
     <div class="container-fluid">
-        <!-- {% if messages %}
+        {% if messages %}
         <div class="row">
             <div class="col-12">
                 {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
                 {% endfor %}
             </div>
         </div>
-        {% endif %} -->
+        {% endif %}
 
         <!-- Listado de Ventas -->
         <div class="row">
@@ -35,11 +44,12 @@
                     <div class="card-header">
                         <h3 class="card-title">Ventas</h3>
                         <div class="card-tools">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#addVentaModal">
+                            <button type="button" class="btn btn-primary" id="btnNuevaVenta">
                                 <i class="fas fa-plus"></i> Nueva Venta
                             </button>
                         </div>
                     </div>
+                    <!-- /.card-header -->
                     
                     <div class="card-body">
                         <table id="mi-tabla" class="table table-bordered table-striped">
@@ -60,117 +70,36 @@
                                     <td>{{ venta.fecha }}</td>
                                     <td>${{ venta.total }}</td>
                                     <td>
-                                        <!-- Botón para abrir modal de productos -->
-                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#productosModal{{ venta.id }}">
+                                        <!-- Botón para ver productos -->
+                                        <button type="button" class="btn btn-info btn-sm ver-productos-btn"
+                                                data-venta-id="{{ venta.id }}">
                                             Ver productos
                                         </button>
-
-                                        <!-- Modal de productos -->
-                                    <!-- Modal: Ver productos de la venta -->
-                                    <div class="modal fade" id="productosModal{{ venta.id }}" tabindex="-1" role="dialog" aria-labelledby="productosModalLabel{{ venta.id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="productosModalLabel{{ venta.id }}">
-                                            Productos de la venta #{{ venta.id }}
-                                            </h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                                            <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                <th>Producto</th>
-                                                <th>Cantidad</th>
-                                                <th>Subtotal</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for item in venta.detalles.all %}
-                                                <tr data-producto-id="{{ item.producto.id }}">
-                                                <td>{{ item.producto.nombre }}</td>
-                                                <td>{{ item.cantidad }}</td>
-                                                <td>${{ item.subtotal|floatformat:2 }}</td>
-                                                </tr>
-                                                {% empty %}
-                                                <tr><td colspan="4">No hay productos en esta venta.</td></tr>
-                                                {% endfor %}
-                                            </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-primary editarProductosBtn" data-venta-id="{{ venta.id }}">
-                                            Editar productos
-                                            </button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    </div>
-
-                                    <!-- Modal: Editar productos -->
-                                    <div class="modal fade" id="editarProductosModal" tabindex="-1" role="dialog" aria-labelledby="editarProductosModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <form method="post" action="{% url 'sale_update_products' 0 %}" id="formEditarProductos">
-                                        {% csrf_token %}
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                            <h5 class="modal-title">Editar productos</h5>
-                                            <button type="button" class="close" data-dismiss="modal">
-                                                <span>&times;</span>
-                                            </button>
-                                            </div>
-                                            <div class="modal-body" id="editarProductosBody">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                <tr>
-                                                    <th>Producto</th>
-                                                    <th>Cantidad</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody id="editarProductosTableBody">
-                                                <!-- Se insertan con JS -->
-                                                </tbody>
-                                            </table>
-                                            </div>
-                                            <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Guardar cambios</button>
-                                            </div>
-                                        </div>
-                                        </form>
-                                    </div>
-                                    </div>
-
-
                                     </td>
                                     <td>{{ venta.metodo_pago }}</td>
                                     <td>
                                         <!-- Botón editar -->
-                                        <button class="btn btn-warning btn-sm edit-venta-btn"
-                                            data-id="{{ venta.id }}"
-                                            data-cliente-id="{{ venta.cliente.id }}"
-                                            data-fecha="{{ venta.fecha|date:'Y-m-d' }}"
-                                            data-metodo-pago="{{ venta.metodo_pago }}"
-                                            data-toggle="modal"
-                                            data-target="#editVentaModal">
+                                        <button type="button" class="btn btn-warning btn-sm edit-venta-btn"
+                                                data-id="{{ venta.id }}"
+                                                data-cliente-id="{{ venta.cliente.id }}"
+                                                data-fecha="{{ venta.fecha|date:'Y-m-d' }}"
+                                                data-metodo-pago="{{ venta.metodo_pago }}">
                                             <i class="fas fa-edit"></i> Editar
                                         </button>
 
                                         <!-- Botón eliminar -->
-                                        <form method="POST" action="{% url 'saleDelete' venta.id %}" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer.');">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash-alt"></i> Eliminar
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm delete-venta-btn"
+                                                data-id="{{ venta.id }}"
+                                                data-cliente="{{ venta.cliente.nombre }}">
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </button>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                    <!-- /.card-body -->
                 </div>
             </div>
         </div>
@@ -178,42 +107,44 @@
 </section>
 
 <!-- Modal Nueva Venta -->
-<div class="modal fade" id="addVentaModal" tabindex="-1" role="dialog" aria-labelledby="addVentaModalLabel" aria-hidden="true">
+<div class="modal fade" id="addVentaModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form class="needs-validation" novalidate method="POST" action="{% url 'saleCreate' %}">
+            <form id="formAgregarVenta" method="POST" action="{% url 'saleCreate' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addVentaModalLabel">Nueva Venta</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title">Nueva Venta</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
                     </button>
                 </div>
-
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="cliente">Cliente</label>
-                        <select class="form-control" id="cliente" name="cliente" required>
-                            <option value="" disabled selected>Seleccione un cliente</option>
+                        <select id="cliente" name="cliente" class="form-control" required>
+                            <option value="">Seleccione un cliente</option>
                             {% for cliente in clientes %}
                                 <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
                             {% endfor %}
                         </select>
+                        <div class="invalid-feedback">Seleccione un cliente.</div>
                     </div>
 
                     <div class="form-group">
                         <label for="fecha">Fecha</label>
-                        <input type="date" class="form-control" id="fecha" name="fecha" required>
+                        <input type="date" id="fecha" name="fecha" class="form-control" required>
+                        <div class="invalid-feedback">Seleccione una fecha.</div>
                     </div>
 
                     <div class="form-group">
                         <label for="metodo_pago">Método de Pago</label>
-                        <select class="form-control" id="metodo_pago" name="metodo_pago" required>
-                            <option value="" disabled selected>Seleccione un método</option>
+                        <select id="metodo_pago" name="metodo_pago" class="form-control" required>
+                            <option value="">Seleccione un método</option>
                             <option value="Efectivo">Efectivo</option>
                             <option value="Tarjeta">Tarjeta</option>
                             <option value="Transferencia">Transferencia</option>
                         </select>
+                        <div class="invalid-feedback">Seleccione un método de pago.</div>
                     </div>
 
                     <div class="form-group">
@@ -221,30 +152,40 @@
                         <div id="productosContainer">
                             <div class="form-row align-items-center mb-2 producto-item">
                                 <div class="col-7">
-                                    <select class="form-control" name="producto[]" required>
-                                        <option value="" disabled selected>Seleccione producto</option>
+                                    <select name="producto[]" class="form-control producto-select" required>
+                                        <option value="">Seleccione producto</option>
                                         {% for producto in productos %}
-                                            <option value="{{ producto.id }}">{{ producto.nombre }} - ${{ producto.precio_venta }}</option>
+                                            <option value="{{ producto.id }}" data-precio="{{ producto.precio_venta }}">
+                                                {{ producto.nombre }} - ${{ producto.precio_venta }}
+                                            </option>
                                         {% endfor %}
                                     </select>
+                                    <div class="invalid-feedback">Seleccione un producto.</div>
                                 </div>
                                 <div class="col-3">
-                                    <input type="number" name="cantidad[]" class="form-control" placeholder="Cantidad" min="1" required>
+                                    <input type="number" name="cantidad[]" class="form-control cantidad-input" placeholder="Cantidad" min="1" required>
+                                    <div class="invalid-feedback">Ingrese una cantidad válida.</div>
                                 </div>
                                 <div class="col-2">
                                     <button type="button" class="btn btn-danger btn-sm remove-producto">&times;</button>
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-info btn-sm mt-2" id="addProducto">+ Agregar producto</button>
+                        <button type="button" class="btn btn-info btn-sm mt-2" id="addProducto">
+                            <i class="fas fa-plus"></i> Agregar producto
+                        </button>
                     </div>
 
                     <div class="form-group">
                         <label for="total">Total</label>
-                        <input type="number" id="total" name="total" class="form-control" readonly>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">$</span>
+                            </div>
+                            <input type="number" id="total" name="total" class="form-control" readonly step="0.01">
+                        </div>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Guardar</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -255,34 +196,24 @@
 </div>
 
 <!-- Modal Editar Venta -->
-<div class="modal fade" id="editVentaModal" tabindex="-1" role="dialog" aria-labelledby="editVentaModalLabel" aria-hidden="true">
+<div class="modal fade" id="editVentaModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form class="needs-validation" novalidate method="POST" id="editVentaForm">
+            <form id="formEditarVenta" method="POST" action="">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editVentaModalLabel">Editar Venta</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title">Editar Venta</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="edit-venta-id" name="id">
 
                     <div class="form-group">
-                        <label for="edit-metodo-pago">Método de Pago</label>
-                        <select class="form-control" id="edit-metodo-pago" name="metodo_pago" required>
-                            <option value="">Seleccione un método</option>
-                            <option value="Efectivo">Efectivo</option>
-                            <option value="Tarjeta">Tarjeta</option>
-                            <option value="Transferencia">Transferencia</option>
-                        </select>
-                        <div class="invalid-feedback">Seleccione un método de pago válido.</div>
-                    </div>
-
-                    <div class="form-group">
                         <label for="edit-cliente">Cliente</label>
-                        <select class="form-control" id="edit-cliente" name="id_cliente" required>
+                        <select id="edit-cliente" name="id_cliente" class="form-control" required>
+                            <option value="">Seleccione un cliente</option>
                             {% for cliente in clientes %}
                                 <option value="{{ cliente.id }}">{{ cliente.nombre }} {{ cliente.apellido }}</option>
                             {% endfor %}
@@ -292,10 +223,20 @@
 
                     <div class="form-group">
                         <label for="edit-fecha">Fecha</label>
-                        <input type="date" class="form-control" id="edit-fecha" name="fecha" required>
+                        <input type="date" id="edit-fecha" name="fecha" class="form-control" required>
                         <div class="invalid-feedback">Ingrese una fecha válida.</div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="edit-metodo-pago">Método de Pago</label>
+                        <select id="edit-metodo-pago" name="metodo_pago" class="form-control" required>
+                            <option value="">Seleccione un método</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione un método de pago válido.</div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
@@ -306,191 +247,548 @@
     </div>
 </div>
 
+<!-- Modal Ver Productos -->
+<div class="modal fade" id="verProductosModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Productos de la venta #<span id="venta-numero"></span></h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productos-venta-body">
+                        <!-- Se llena dinámicamente via AJAX -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="font-weight-bold">
+                            <td colspan="3" class="text-right">Total:</td>
+                            <td id="total-venta">$0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary editar-productos-btn" id="btnEditarProductos">
+                    <i class="fas fa-edit"></i> Editar productos
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Productos -->
+<div class="modal fade" id="editarProductosModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form id="formEditarProductos" method="POST" action="">
+                {% csrf_token %}
+                <!-- 🔥 Campo hidden para enviar el total actualizado -->
+                <input type="hidden" id="hidden-total-venta" name="total_venta" value="">
+                
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Productos de la Venta</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Al modificar las cantidades, el total se actualizará automáticamente.
+                    </div>
+                    
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio Unitario</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="editar-productos-body">
+                            <!-- Se llena dinámicamente via AJAX -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-weight-bold bg-light">
+                                <td colspan="3" class="text-right">
+                                    <strong>Total:</strong>
+                                </td>
+                                <td>
+                                    <strong>$<span id="total-editar-productos">0.00</span></strong>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div class="modal fade" id="deleteVentaModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="formEliminarVenta" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="delete-venta-id" name="id">
+                    <p>¿Está seguro que desea eliminar la venta del cliente <strong id="delete-venta-cliente"></strong>?</p>
+                    <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
-    // Validación Bootstrap
-    (function () {
-        'use strict';
-        window.addEventListener('load', function () {
-            const forms = document.getElementsByClassName('needs-validation');
-            Array.prototype.forEach.call(forms, function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-    })();
 
-    document.addEventListener("DOMContentLoaded", function () {
-        // Modal edición general de venta
-        document.querySelectorAll('.edit-venta-btn').forEach(function (button) {
-            button.addEventListener('click', function () {
-                const ventaId = this.getAttribute('data-id');
-                const clienteId = this.getAttribute('data-cliente-id');
-                const fecha = this.getAttribute('data-fecha');
-                const metodoPago = this.getAttribute('data-metodo-pago');
+function waitForJQuery() {
+    if (typeof $ !== 'undefined') {
+        initVentas();
+    } else {
+        setTimeout(waitForJQuery, 100);
+    }
+}
 
-                document.getElementById('edit-venta-id').value = ventaId;
-                document.getElementById('edit-cliente').value = clienteId;
-                document.getElementById('edit-fecha').value = fecha;
-                document.getElementById('edit-metodo-pago').value = metodoPago;
-
-                const form = document.getElementById('editVentaForm');
-                form.action = `/sales/update/${ventaId}/`;
-            });
-        });
-
-// Modal edición de productos de una venta
-document.querySelectorAll('.editarProductosBtn').forEach(function (editarBtn) {
-    editarBtn.addEventListener("click", function () {
-        const ventaId = this.getAttribute("data-venta-id");
-        const formEditar = document.getElementById("formEditarProductos");
-        const editarBody = document.getElementById("editarProductosBody");
-
-        // Ocultar modal productos abierto para que no se superpongan
-        $(`#productosModal${ventaId}`).modal('hide');
-        formEditar.action = `/sales/update-products/${ventaId}/`;
-
-        const modal = document.getElementById(`productosModal${ventaId}`);
-        const filas = modal.querySelector("tbody").querySelectorAll("tr");
-
-        let html = `
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unitario</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        filas.forEach(row => {
-            const productoId = row.getAttribute("data-producto-id");
-            const nombre = row.children[0].innerText.trim();
-            const cantidad = row.children[1].innerText.trim();
-            const subtotal = parseFloat(row.children[2].innerText.replace('$', ''));
-            const precioUnitario = (subtotal / cantidad).toFixed(2);
-
-html += `
-  <tr>
-    <td>
-      ${nombre}
-      <input type="hidden" name="producto[]" value="${productoId}">
-    </td>
-    <td>
-      <input type="number" name="cantidad[]" class="form-control cantidad-input" value="${cantidad}" min="1" required>
-    </td>
-    <td>$${precioUnitario}</td>
-    <td class="subtotal-cell">$${subtotal.toFixed(2)}</td>
-    <input type="hidden" name="subtotal[]" value="${subtotal.toFixed(2)}">
-  </tr>
-`;
-
-        });
-
-        html += `</tbody></table><div class="text-right font-weight-bold">Total: $<span id="totalProductosEditar">0.00</span></div>`;
-
-        editarBody.innerHTML = html;
-
-        actualizarTotalEditarProductos();
-
-        editarBody.querySelectorAll(".cantidad-input").forEach(input => {
-input.addEventListener("input", function () {
-    const tr = this.closest("tr");
-    const cantidad = parseFloat(this.value) || 0;
-    const precioText = tr.children[2].innerText.replace('$', '');
-    const precio = parseFloat(precioText) || 0;
-    const subtotal = cantidad * precio;
-    tr.querySelector(".subtotal-cell").textContent = `$${subtotal.toFixed(2)}`;
+function initVentas() {
+    console.log('Script ventas iniciado');
+    console.log('jQuery disponible:', typeof $ !== 'undefined');
+    console.log('Bootstrap modal disponible:', typeof $.fn.modal !== 'undefined');
     
-    const inputSubtotal = tr.querySelector('input[name="subtotal[]"]');
-    if(inputSubtotal){
-        inputSubtotal.value = subtotal.toFixed(2);
-    }
-
-    actualizarTotalEditarProductos();
-});
-        });
-
-        $("#editarProductosModal").modal("show");
-    });
-});
-
-    });
-
-    function actualizarTotalEditarProductos() {
-        let total = 0;
-        document.querySelectorAll("#editarProductosBody .subtotal-cell").forEach(cell => {
-            const valor = parseFloat(cell.textContent.replace('$', '')) || 0;
-            total += valor;
-        });
-        document.getElementById("totalProductosEditar").textContent = total.toFixed(2);
-    }
-
-    // Total en formulario nuevo o edición general
-    function calcularTotal() {
-        let total = 0;
-        document.querySelectorAll('#productosContainer .producto-item').forEach(function (item) {
-            const select = item.querySelector('select');
-            const cantidadInput = item.querySelector('input[name="cantidad[]"]');
-            const cantidad = parseInt(cantidadInput.value) || 0;
-            let precio = 0;
-            if (select && select.selectedOptions.length > 0) {
-                const texto = select.selectedOptions[0].textContent;
-                const match = texto.match(/\$(\d+(\.\d+)?)/);
-                if (match) {
-                    precio = parseFloat(match[1]);
-                }
-            }
-            total += precio * cantidad;
-        });
-        document.getElementById('total').value = total.toFixed(2);
-    }
-
-    // Eventos para recalcular total en formulario principal
-    document.addEventListener('input', function (e) {
-        if (e.target.closest('#productosContainer')) {
-            calcularTotal();
-        }
+    // Inicializar fecha actual
+    var today = new Date().toISOString().split('T')[0];
+    $('#fecha').val(today);
+    
+    // Botón Nueva Venta
+    $('#btnNuevaVenta').click(function() {
+        console.log('Click en Nueva Venta');
+        $('#formAgregarVenta')[0].reset();
+        $('#formAgregarVenta').removeClass('was-validated');
+        
+        // Resetear productos a solo uno
+        $('#productosContainer').html(`
+            <div class="form-row align-items-center mb-2 producto-item">
+                <div class="col-7">
+                    <select name="producto[]" class="form-control producto-select" required>
+                        <option value="">Seleccione producto</option>
+                        {% for producto in productos %}
+                            <option value="{{ producto.id }}" data-precio="{{ producto.precio_venta }}">
+                                {{ producto.nombre }} - ${{ producto.precio_venta }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="invalid-feedback">Seleccione un producto.</div>
+                </div>
+                <div class="col-3">
+                    <input type="number" name="cantidad[]" class="form-control cantidad-input" placeholder="Cantidad" min="1" required>
+                    <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-danger btn-sm remove-producto">&times;</button>
+                </div>
+            </div>
+        `);
+        
+        $('#fecha').val(today);
+        calcularTotal();
+        $('#addVentaModal').modal('show');
     });
 
-    document.addEventListener('change', function (e) {
-        if (e.target.closest('#productosContainer')) {
-            calcularTotal();
-        }
+    // Botones Editar Venta
+    $('.edit-venta-btn').click(function() {
+        console.log('Click en Editar Venta');
+        var data = $(this).data();
+        
+        // Actualizar action del formulario
+        $('#formEditarVenta').attr('action', '/sales/update/' + data.id + '/');
+        
+        $('#edit-venta-id').val(data.id);
+        $('#edit-cliente').val(data.clienteId);
+        $('#edit-fecha').val(data.fecha);
+        $('#edit-metodo-pago').val(data.metodoPago);
+        
+        $('#formEditarVenta').removeClass('was-validated');
+        $('#editVentaModal').modal('show');
     });
 
-    // Agregar producto nuevo en formulario principal
-    document.getElementById('addProducto').addEventListener('click', function () {
-        const container = document.getElementById('productosContainer');
-        const newItem = container.querySelector('.producto-item').cloneNode(true);
-        newItem.querySelector('select').selectedIndex = 0;
-        newItem.querySelector('input[name="cantidad[]"]').value = '';
-        container.appendChild(newItem);
+    // Botones Eliminar
+    $('.delete-venta-btn').click(function() {
+        console.log('Click en Eliminar Venta');
+        var id = $(this).data('id');
+        var cliente = $(this).data('cliente');
+        
+        $('#formEliminarVenta').attr('action', '/sales/delete/' + id + '/');
+        $('#delete-venta-id').val(id);
+        $('#delete-venta-cliente').text(cliente);
+        $('#deleteVentaModal').modal('show');
+    });
+
+    // Ver productos de una venta
+    $('.ver-productos-btn').click(function() {
+        var ventaId = $(this).data('venta-id');
+        console.log('Ver productos de venta:', ventaId);
+        
+        $('#venta-numero').text(ventaId);
+        cargarProductosVenta(ventaId);
+        $('#verProductosModal').modal('show');
+    });
+
+    // Editar productos desde el modal de ver productos
+    $(document).on('click', '#btnEditarProductos', function() {
+        var ventaId = $('#venta-numero').text();
+        console.log('Editar productos de venta:', ventaId);
+        
+        $('#verProductosModal').modal('hide');
+        setTimeout(function() {
+            cargarProductosParaEditar(ventaId);
+            $('#editarProductosModal').modal('show');
+        }, 300);
+    });
+
+    // Agregar producto en formulario de nueva venta
+    $('#addProducto').click(function() {
+        console.log('Agregar producto');
+        var newItem = $('#productosContainer .producto-item:first').clone();
+        newItem.find('select').val('');
+        newItem.find('input').val('');
+        newItem.find('.is-invalid').removeClass('is-invalid');
+        $('#productosContainer').append(newItem);
         calcularTotal();
     });
 
-    // Eliminar producto en formulario principal
-    document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-producto')) {
-            const items = document.querySelectorAll('#productosContainer .producto-item');
-            if (items.length > 1) {
-                e.target.closest('.producto-item').remove();
-                calcularTotal();
-            }
+    // Remover producto
+    $(document).on('click', '.remove-producto', function() {
+        var items = $('#productosContainer .producto-item');
+        if (items.length > 1) {
+            $(this).closest('.producto-item').remove();
+            calcularTotal();
+        } else {
+            alert('Debe mantener al menos un producto');
         }
     });
+
+    // Calcular total cuando cambian productos o cantidades
+    $(document).on('change input', '.producto-select, .cantidad-input', function() {
+        calcularTotal();
+    });
+
+    // Calcular total en modal de editar productos
+    $(document).on('change input keyup', '.cantidad-editar-input', function() {
+        console.log('Cambio en cantidad detectado');
+        calcularTotalEditarProductos();
+    });
+
+    // Función para calcular total en nueva venta
+    function calcularTotal() {
+        var total = 0;
+        $('#productosContainer .producto-item').each(function() {
+            var precio = parseFloat($(this).find('.producto-select option:selected').data('precio')) || 0;
+            var cantidad = parseFloat($(this).find('.cantidad-input').val()) || 0;
+            total += precio * cantidad;
+        });
+        $('#total').val(total.toFixed(2));
+    }
+
+    // Función para cargar productos de una venta 
+    function cargarProductosVenta(ventaId) {
+        console.log('Cargando productos para venta:', ventaId);
+        
+        // Mostrar loading
+        $('#productos-venta-body').html('<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando productos...</td></tr>');
+        $('#total-venta').text('Cargando...');
+        
+        
+        $.ajax({
+            url: '/sales/get-products/' + ventaId + '/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('Respuesta del servidor:', response);
+                
+                if (response.success) {
+                    var html = '';
+                    
+                    if (response.productos.length > 0) {
+                        response.productos.forEach(function(producto) {
+                            html += `
+                                <tr>
+                                    <td>${producto.nombre}</td>
+                                    <td>${producto.cantidad}</td>
+                                    <td>$${producto.precio_unitario.toFixed(2)}</td>
+                                    <td>$${producto.subtotal.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        });
+                        $('#total-venta').text('$' + response.total.toFixed(2));
+                    } else {
+                        html = '<tr><td colspan="4" class="text-center text-muted">No hay productos en esta venta</td></tr>';
+                        $('#total-venta').text('$0.00');
+                    }
+                    
+                    $('#productos-venta-body').html(html);
+                    
+                } else {
+                    $('#productos-venta-body').html('<tr><td colspan="4" class="text-center text-danger">Error: ' + response.error + '</td></tr>');
+                    $('#total-venta').text('Error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error en AJAX:', error);
+                $('#productos-venta-body').html('<tr><td colspan="4" class="text-center text-danger">Error al cargar los productos</td></tr>');
+                $('#total-venta').text('Error');
+            }
+        });
+    }
+
+    // Función para cargar productos para editar
+    function cargarProductosParaEditar(ventaId) {
+        console.log('Cargando productos para editar, venta:', ventaId);
+        
+        $('#formEditarProductos').attr('action', '/sales/update-products/' + ventaId + '/');
+        
+        // Mostrar loading
+        $('#editar-productos-body').html('<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando productos...</td></tr>');
+        $('#total-editar-productos').text('Cargando...');
+        
+        
+        $.ajax({
+            url: '/sales/get-products/' + ventaId + '/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('Respuesta para editar:', response);
+                
+                if (response.success) {
+                    var html = '';
+                    
+                    if (response.productos.length > 0) {
+                        response.productos.forEach(function(producto) {
+                            html += `
+                                <tr>
+                                    <td>
+                                        ${producto.nombre}
+                                        <input type="hidden" name="producto[]" value="${producto.id}">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="cantidad[]" 
+                                               class="form-control cantidad-editar-input" 
+                                               value="${producto.cantidad}" 
+                                               min="1" 
+                                               step="1"
+                                               data-precio="${producto.precio_unitario}"
+                                               required>
+                                    </td>
+                                    <td class="precio-unitario">$${producto.precio_unitario.toFixed(2)}</td>
+                                    <td class="subtotal-editar">$${producto.subtotal.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        html = '<tr><td colspan="4" class="text-center text-muted">No hay productos en esta venta</td></tr>';
+                    }
+                    
+                    $('#editar-productos-body').html(html);
+                    
+                    
+                    setTimeout(function() {
+                        // Agregar campos hidden para subtotales
+                        $('#editar-productos-body tr').each(function() {
+                            var $row = $(this);
+                            var subtotalText = $row.find('.subtotal-editar').text().replace('$', '');
+                            var subtotal = parseFloat(subtotalText) || 0;
+                            $row.append('<input type="hidden" name="subtotal[]" value="' + subtotal.toFixed(2) + '">');
+                        });
+                        
+                        calcularTotalEditarProductos();
+                    }, 100);
+                    
+                } else {
+                    $('#editar-productos-body').html('<tr><td colspan="4" class="text-center text-danger">Error: ' + response.error + '</td></tr>');
+                    $('#total-editar-productos').text('0.00');
+                    $('#hidden-total-venta').val('0.00');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error en AJAX para editar:', error);
+                $('#editar-productos-body').html('<tr><td colspan="4" class="text-center text-danger">Error al cargar los productos</td></tr>');
+                $('#total-editar-productos').text('0.00');
+                $('#hidden-total-venta').val('0.00');
+            }
+        });
+    }
+
+    // calcula total en editar productos
+    function calcularTotalEditarProductos() {
+        console.log('Calculando total en editar productos...');
+        var total = 0;
+        
+        $('#editar-productos-body tr').each(function() {
+            var $row = $(this);
+            var precioText = $row.find('.precio-unitario').text().replace('$', '');
+            var precio = parseFloat(precioText) || 0;
+            var cantidad = parseFloat($row.find('.cantidad-editar-input').val()) || 0;
+            var subtotal = precio * cantidad;
+            
+            // Actualiza subtotal mostrado
+            $row.find('.subtotal-editar').text('$' + subtotal.toFixed(2));
+            
+            // Actualiza el campo hidden subtotal[]
+            var $hiddenSubtotal = $row.find('input[name="subtotal[]"]');
+            if ($hiddenSubtotal.length > 0) {
+                $hiddenSubtotal.val(subtotal.toFixed(2));
+            } else {
+                
+                $row.append('<input type="hidden" name="subtotal[]" value="' + subtotal.toFixed(2) + '">');
+            }
+            
+            total += subtotal;
+            
+            console.log('Fila:', {
+                precio: precio,
+                cantidad: cantidad,
+                subtotal: subtotal,
+                total_acumulado: total
+            });
+        });
+        
+        $('#total-editar-productos').text(total.toFixed(2));
+        
+        // campo hidden del total
+        $('#hidden-total-venta').val(total.toFixed(2));
+        
+        console.log('Total final calculado:', total.toFixed(2));
+    }
+
+    // Validación de formularios
+    $('form[id^="form"]').submit(function(e) {
+        var form = this;
+        console.log('Submit formulario:', form.id);
+        
+        // Validar campos requeridos
+        var isValid = true;
+        $(form).find('[required]').each(function() {
+            if (!this.value.trim()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // Validación especial para formulario de nueva venta
+        if (form.id === 'formAgregarVenta') {
+            // Verificar que hay al menos un producto con cantidad
+            var hasValidProducts = false;
+            $('#productosContainer .producto-item').each(function() {
+                var producto = $(this).find('.producto-select').val();
+                var cantidad = $(this).find('.cantidad-input').val();
+                if (producto && cantidad && parseInt(cantidad) > 0) {
+                    hasValidProducts = true;
+                }
+            });
+            
+            if (!hasValidProducts) {
+                alert('Debe agregar al menos un producto con cantidad válida');
+                isValid = false;
+            }
+        }
+
+        // Validación especial para formulario de editar productos
+        if (form.id === 'formEditarProductos') {
+            console.log('Validando formulario de editar productos');
+            
+            // Verificar que todas las cantidades sean válidas
+            var hasValidQuantities = true;
+            $('#editar-productos-body .cantidad-editar-input').each(function() {
+                var cantidad = parseInt($(this).val());
+                if (!cantidad || cantidad < 1) {
+                    hasValidQuantities = false;
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+            
+            if (!hasValidQuantities) {
+                alert('Todas las cantidades deben ser números mayores a 0');
+                isValid = false;
+            }
+            
+            // Recalcular una vez más antes de enviar para asegurar datos correctos
+            calcularTotalEditarProductos();
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            $(form).addClass('was-validated');
+            return false;
+        }
+        
+        // Si todo está bien, mostrar loading
+        var submitBtn = $(form).find('[type="submit"]');
+        var originalText = submitBtn.html();
+        submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
+        
+        // Restaurar botón después de 3 segundos (por si hay error)
+        setTimeout(function() {
+            submitBtn.html(originalText).prop('disabled', false);
+        }, 3000);
+    });
+
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(function() {
+        $('.alert').alert('close');
+    }, 5000);
+
+    // Debug: Mostrar datos del formulario antes de enviar 
+    $('#formEditarProductos').submit(function(e) {
+        console.log('=== DATOS QUE SE ENVÍAN ===');
+        var formData = new FormData(this);
+        for (var pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        console.log('========================');
+    });
+}
+
+// Iniciar cuando la página esté lista
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', waitForJQuery);
+} else {
+    waitForJQuery();
+}
 </script>
-
-
-
-
 
 {% endblock %}

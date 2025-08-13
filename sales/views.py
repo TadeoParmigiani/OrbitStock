@@ -5,6 +5,7 @@ from products.models import Producto
 from customers.models import Cliente
 from decimal import Decimal
 from django.contrib import messages
+from django.http import JsonResponse
 
 @login_required
 def salesList(request):
@@ -78,10 +79,6 @@ def sale_update(request, pk):
         venta.cliente = cliente
         venta.metodo_pago = metodo_pago
 
-        # NO modificar productos ni stock aquí
-        # El total debería actualizarse solo si corresponde (o mantenerlo)
-        # Si no cambian productos, mantener el total que ya tiene la venta
-
         venta.save()
 
     return redirect('SaleList')
@@ -98,91 +95,150 @@ def sale_delete(request, pk):
 def sale_update_products(request, sale_id):
     venta = get_object_or_404(Venta, id=sale_id)
 
+    if request.method != 'POST':
+        return redirect('SaleList')
+
     try:
         productos_ids_raw = request.POST.getlist('producto[]')
         cantidades_raw = request.POST.getlist('cantidad[]')
-        subtotales_raw = request.POST.getlist('subtotal[]')
-
+        
+        print("DEBUG - Datos recibidos:")
+        print(f"productos_ids_raw: {productos_ids_raw}")
+        print(f"cantidades_raw: {cantidades_raw}")
+        
         # Validación básica
-        if not productos_ids_raw or not cantidades_raw or not subtotales_raw:
+        if not productos_ids_raw or not cantidades_raw:
             messages.error(request, "Datos de productos incompletos.")
             return redirect('SaleList')
 
-        if len(productos_ids_raw) != len(cantidades_raw) or len(productos_ids_raw) != len(subtotales_raw):
+        if len(productos_ids_raw) != len(cantidades_raw):
             messages.error(request, "Cantidad de datos inconsistentes.")
             return redirect('SaleList')
 
         try:
-            productos_ids = [int(pid) for pid in productos_ids_raw]
-            cantidades = [int(c) for c in cantidades_raw]
-            subtotales = [Decimal(s) for s in subtotales_raw]
-        except ValueError:
-            messages.error(request, "Formato inválido en productos, cantidades o subtotales.")
+            productos_ids = [int(pid) for pid in productos_ids_raw if pid.strip()]
+            cantidades = [int(c) for c in cantidades_raw if c.strip()]
+        except ValueError as e:
+            messages.error(request, f"Formato inválido en productos o cantidades: {e}")
             return redirect('SaleList')
 
-        # 🔥 PASO 1: VALIDAR STOCK ANTES DE MODIFICAR NADA
-        # Primero calculamos el stock disponible considerando lo que ya está en la venta
-        detalles_actuales = list(venta.detalles.all())  # Convertir a lista para evitar problemas
+        # Verificar que las listas tengan el mismo tamaño después de la conversión
+        if len(productos_ids) != len(cantidades):
+            messages.error(request, "Error en el procesamiento de datos.")
+            return redirect('SaleList')
+
+        
+        detalles_actuales = list(venta.detalles.all())
         
         for i in range(len(productos_ids)):
-            producto = get_object_or_404(Producto, id=productos_ids[i])
-            nueva_cantidad = cantidades[i]
-            
-            # Buscar si este producto ya estaba en la venta anterior
-            cantidad_anterior = 0
-            for detalle in detalles_actuales:
-                if detalle.producto_id == productos_ids[i]:
-                    cantidad_anterior = detalle.cantidad
-                    break
-            
-            # Stock disponible = stock actual + lo que teníamos reservado antes
-            stock_disponible = producto.stock_inicial + cantidad_anterior
-            
-            if stock_disponible < nueva_cantidad:
-                messages.error(request, 
-                    f"Stock insuficiente para {producto.nombre}. "
-                    f"Cantidad solicitada: {nueva_cantidad}, "
-                    f"Stock disponible: {stock_disponible} "
-                    f"(actual: {producto.stock_inicial} + en venta anterior: {cantidad_anterior})")
+            try:
+                producto = get_object_or_404(Producto, id=productos_ids[i])
+                nueva_cantidad = cantidades[i]
+                
+                # Buscar cantidad anterior para este producto
+                cantidad_anterior = 0
+                for detalle in detalles_actuales:
+                    if detalle.producto_id == productos_ids[i]:
+                        cantidad_anterior = detalle.cantidad
+                        break
+                
+                # Stock disponible = stock actual + lo que teníamos reservado antes
+                stock_disponible = producto.stock_inicial + cantidad_anterior
+                
+                if stock_disponible < nueva_cantidad:
+                    messages.error(request, 
+                        f"Stock insuficiente para {producto.nombre}. "
+                        f"Cantidad solicitada: {nueva_cantidad}, "
+                        f"Stock disponible: {stock_disponible}")
+                    return redirect('SaleList')
+                    
+            except Exception as e:
+                messages.error(request, f"Error validando producto {productos_ids[i]}: {e}")
                 return redirect('SaleList')
 
-        # 🔥 PASO 2: SI LLEGAMOS AQUÍ, TODO ESTÁ OK - AHORA SÍ MODIFICAMOS
-        
-        # Revertir stock anterior
+        # REVERTIR STOCK ANTERIOR
         for detalle in detalles_actuales:
-            detalle.producto.stock_inicial += detalle.cantidad
-            detalle.producto.save()
+            try:
+                detalle.producto.stock_inicial += detalle.cantidad
+                detalle.producto.save()
+                print(f"DEBUG - Revirtiendo stock: {detalle.producto.nombre} +{detalle.cantidad}")
+            except Exception as e:
+                print(f"ERROR revirtiendo stock: {e}")
 
         # Borrar detalles anteriores
         venta.detalles.all().delete()
 
-        # Crear nuevos detalles
+        #CREAR NUEVOS DETALLES Y DESCONTAR STOCK
         total_venta = Decimal('0.00')
 
         for i in range(len(productos_ids)):
-            producto = get_object_or_404(Producto, id=productos_ids[i])
-            
-            # Descontar nuevo stock
-            producto.stock_inicial -= cantidades[i]
-            producto.save()
+            try:
+                producto = get_object_or_404(Producto, id=productos_ids[i])
+                cantidad = cantidades[i]
+                
+                # Usar el precio actual del producto (podrías cambiarlo por precio histórico si lo prefieres)
+                precio_unitario = producto.precio_venta
+                subtotal = precio_unitario * cantidad
+                
+                # Crear detalle
+                DetalleVenta.objects.create(
+                    venta=venta,
+                    producto=producto,
+                    cantidad=cantidad,
+                    precio_unitario=precio_unitario
+                )
+                
+                # Descontar stock
+                producto.stock_inicial -= cantidad
+                producto.save()
+                
+                total_venta += subtotal
+                
+                print(f"DEBUG - Producto procesado: {producto.nombre}, cantidad: {cantidad}, subtotal: {subtotal}")
+                
+            except Exception as e:
+                messages.error(request, f"Error procesando producto {productos_ids[i]}: {e}")
+                return redirect('SaleList')
 
-            precio_unitario = subtotales[i] / cantidades[i] if cantidades[i] else Decimal('0.00')
-
-            DetalleVenta.objects.create(
-                venta=venta,
-                producto=producto,
-                cantidad=cantidades[i],
-                precio_unitario=precio_unitario
-            )
-
-            total_venta += subtotales[i]
-
+        #ACTUALIZAR TOTAL DE LA VENTA
         venta.total = total_venta
         venta.save()
+        
+        print(f"DEBUG - Total venta actualizado: {total_venta}")
 
-        messages.success(request, "Productos de la venta actualizados correctamente.")
+        messages.success(request, f"Productos actualizados correctamente. Nuevo total: ${total_venta}")
         
     except Exception as e:
-        messages.error(request, f"Error al actualizar venta: {e}")
+        messages.error(request, f"Error inesperado al actualizar venta: {e}")
+        print(f"ERROR GENERAL: {e}")
 
     return redirect('SaleList')
+
+login_required
+def get_sale_products(request, sale_id):
+    """Vista para obtener los productos de una venta específica vía AJAX"""
+    try:
+        venta = get_object_or_404(Venta, id=sale_id)
+        detalles = venta.detalles.all()
+        
+        productos_data = []
+        for detalle in detalles:
+            productos_data.append({
+                'id': detalle.producto.id,
+                'nombre': detalle.producto.nombre,
+                'cantidad': detalle.cantidad,
+                'precio_unitario': float(detalle.precio_unitario),
+                'subtotal': float(detalle.cantidad * detalle.precio_unitario)
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'productos': productos_data,
+            'total': float(venta.total)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
