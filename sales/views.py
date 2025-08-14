@@ -214,15 +214,31 @@ def sale_update_products(request, sale_id):
 
     return redirect('SaleList')
 
-login_required
+
+@login_required
 def get_sale_products(request, sale_id):
     """Vista para obtener los productos de una venta específica vía AJAX"""
     try:
         venta = get_object_or_404(Venta, id=sale_id)
-        detalles = venta.detalles.all()
+        
+        # Intentar ambas formas de obtener los detalles
+        try:
+            
+            detalles = venta.detalles.all()
+            print(f"DEBUG - Usando venta.detalles.all(): {detalles.count()} detalles")
+        except AttributeError:
+            
+            detalles = DetalleVenta.objects.filter(venta=venta)
+            print(f"DEBUG - Usando filtro directo: {detalles.count()} detalles")
+        
+        # Debug adicional
+        print(f"DEBUG - Venta ID: {sale_id}")
+        print(f"DEBUG - Venta encontrada: {venta}")
+        print(f"DEBUG - Total venta: {venta.total}")
         
         productos_data = []
         for detalle in detalles:
+            print(f"DEBUG - Detalle: {detalle.producto.nombre}, cantidad: {detalle.cantidad}")
             productos_data.append({
                 'id': detalle.producto.id,
                 'nombre': detalle.producto.nombre,
@@ -231,6 +247,8 @@ def get_sale_products(request, sale_id):
                 'subtotal': float(detalle.cantidad * detalle.precio_unitario)
             })
         
+        print(f"DEBUG - Productos data final: {productos_data}")
+        
         return JsonResponse({
             'success': True,
             'productos': productos_data,
@@ -238,6 +256,9 @@ def get_sale_products(request, sale_id):
         })
         
     except Exception as e:
+        print(f"ERROR en get_sale_products: {e}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)
